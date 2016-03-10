@@ -368,9 +368,9 @@ set( ANDROID_SUPPORTED_ABIS_mips64el "mips64" )
 set( ANDROID_DEFAULT_NDK_API_LEVEL 9 )
 set( ANDROID_DEFAULT_NDK_API_LEVEL_x86 9 )
 set( ANDROID_DEFAULT_NDK_API_LEVEL_mips 9 )
-set( ANDROID_DEFAULT_NDK_API_LEVEL_arm64 "L" )
-set( ANDROID_DEFAULT_NDK_API_LEVEL_x86_64 "L" )
-set( ANDROID_DEFAULT_NDK_API_LEVEL_mips64 "L" )
+set( ANDROID_DEFAULT_NDK_API_LEVEL_arm64 "21" )
+set( ANDROID_DEFAULT_NDK_API_LEVEL_x86_64 "21" )
+set( ANDROID_DEFAULT_NDK_API_LEVEL_mips64 "21" )
 
 
 macro( __LIST_FILTER listvar regex )
@@ -1578,7 +1578,7 @@ endif()
 # global includes and link directories
 include_directories( SYSTEM "${ANDROID_SYSROOT}/usr/include" ${ANDROID_STL_INCLUDE_DIRS} )
 get_filename_component(__android_install_path "${CMAKE_INSTALL_PREFIX}/libs/${ANDROID_NDK_ABI_NAME}" ABSOLUTE) # avoid CMP0015 policy warning
-link_directories( "${__android_install_path}" )
+link_directories( "${ANDROID_SYSROOT}/usr/lib" )
 
 # detect if need link crtbegin_so.o explicitly
 if( NOT DEFINED ANDROID_EXPLICIT_CRT_LINK )
