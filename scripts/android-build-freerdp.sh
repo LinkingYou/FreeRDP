@@ -130,6 +130,11 @@ do
         fi
     fi
 
+    if [ "$FETCH_ONLY" -ne "0" ]
+    then
+        continue;
+    fi
+
     # Build and install the library.
 	ANDROID_NATIVE_API_LEVEL=android-$NDK_TARGET
 	common_run cd $BASE
@@ -143,4 +148,9 @@ do
 	common_run cmake --build . --target install
 done
 
-echo "Successfully build library for architectures $BUILD_ARCH"
+if [ "$FETCH_ONLY" -ne "0" ]
+then
+    echo "Successfully fetched library sources"
+else
+    echo "Successfully build library for architectures $BUILD_ARCH"
+fi

@@ -72,6 +72,11 @@ common_run cd $BUILD_SRC
 common_run git am $(dirname "${BASH_SOURCE[0]}")/openssl-android64-support.patch
 common_run cd $BASE
 
+if [ "$FETCH_ONLY" -ne "0" ]
+then
+	exit 0
+fi
+
 ORG_PATH=$PATH
 for ARCH in $BUILD_ARCH
 do

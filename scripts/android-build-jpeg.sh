@@ -36,6 +36,11 @@ common_check_requirements
 common_update $SCM_URL $SCM_TAG $BUILD_SRC
 common_clean $BUILD_DST
 
+if [ "$FETCH_ONLY" -ne "0" ]
+then
+	exit 0
+fi
+
 build
 
 common_copy $BUILD_SRC $BUILD_DST

@@ -28,6 +28,10 @@ if [ -z $SCM_TAG ]; then
 	SCM_TAG=master
 fi
 
+if [ -z $FETCH_ONLY ]; then
+	FETCH_ONLY=0
+fi
+
 CLEAN_BUILD_DIR=0
 
 function common_help {
@@ -69,6 +73,11 @@ function common_parse_arguments {
             source "$2"
             shift
             ;;
+
+			--fetch-only)
+			FETCH_ONLY="$2"
+			shift
+			;;
 
 			--ndk)
 			ANDROID_NDK="$2"
