@@ -1,0 +1,54 @@
+From c6b156558b972d8995c63cc653972b73b6d4a92c Mon Sep 17 00:00:00 2001
+From: Armin Novak <armin.novak@gmail.com>
+Date: Thu, 10 Mar 2016 23:03:47 +0100
+Subject: [PATCH] Added android64 and android64-aarch64 support.
+
+---
+ Configure             | 2 ++
+ crypto/evp/Makefile   | 2 +-
+ crypto/modes/Makefile | 2 +-
+ 3 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/Configure b/Configure
+index c98107a..59e65c6 100755
+--- a/Configure
++++ b/Configure
+@@ -471,7 +471,9 @@ my %table=(
+ # Android: linux-* but without pointers to headers and libs.
+ "android","gcc:-mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+ "android-x86","gcc:-mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:".eval{my $asm=${x86_elf_asm};$asm=~s/:elf/:android/;$asm}.":dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"android64",	"gcc:-mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib64 -m64 -DL_ENDIAN -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:elf:dlfcn:linux-shared:-fPIC:-m64:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
+ "android-armv7","gcc:-march=armv7-a -mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${armv4_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"android64-aarch64","gcc:-march=armv8-a -mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${aarch64_asm}:linux64:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+ "android-mips","gcc:-mandroid -I\$(ANDROID_DEV)/include -B\$(ANDROID_DEV)/lib -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${mips32_asm}:o32:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+ 
+ #### *BSD [do see comment about ${BSDthreads} above!]
+diff --git a/crypto/evp/Makefile b/crypto/evp/Makefile
+index aaaad98..f63080f 100644
+--- a/crypto/evp/Makefile
++++ b/crypto/evp/Makefile
+@@ -198,7 +198,7 @@ e_aes.o: ../../include/openssl/objects.h ../../include/openssl/opensslconf.h
+ e_aes.o: ../../include/openssl/opensslv.h ../../include/openssl/ossl_typ.h
+ e_aes.o: ../../include/openssl/rand.h ../../include/openssl/safestack.h
+ e_aes.o: ../../include/openssl/stack.h ../../include/openssl/symhacks.h
+-e_aes.o: ../modes/modes_lcl.h e_aes.c evp_locl.h
++e_aes.o: ../arm_arch.h ../modes/modes_lcl.h e_aes.c evp_locl.h
+ e_aes_cbc_hmac_sha1.o: ../../include/openssl/aes.h ../../include/openssl/asn1.h
+ e_aes_cbc_hmac_sha1.o: ../../include/openssl/bio.h
+ e_aes_cbc_hmac_sha1.o: ../../include/openssl/crypto.h
+diff --git a/crypto/modes/Makefile b/crypto/modes/Makefile
+index a7863d9..62d45af 100644
+--- a/crypto/modes/Makefile
++++ b/crypto/modes/Makefile
+@@ -139,7 +139,7 @@ gcm128.o: ../../include/openssl/crypto.h ../../include/openssl/e_os2.h
+ gcm128.o: ../../include/openssl/modes.h ../../include/openssl/opensslconf.h
+ gcm128.o: ../../include/openssl/opensslv.h ../../include/openssl/ossl_typ.h
+ gcm128.o: ../../include/openssl/safestack.h ../../include/openssl/stack.h
+-gcm128.o: ../../include/openssl/symhacks.h gcm128.c modes_lcl.h
++gcm128.o: ../../include/openssl/symhacks.h ../arm_arch.h gcm128.c modes_lcl.h
+ ofb128.o: ../../include/openssl/crypto.h ../../include/openssl/e_os2.h
+ ofb128.o: ../../include/openssl/modes.h ../../include/openssl/opensslconf.h
+ ofb128.o: ../../include/openssl/opensslv.h ../../include/openssl/ossl_typ.h
+-- 
+2.1.4
+

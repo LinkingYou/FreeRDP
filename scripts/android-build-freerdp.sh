@@ -25,6 +25,10 @@ while [[ $# > 0 ]]
 do
 	key="$1"
 	case $key in
+		--freerdp-cfg)
+			source "$2"
+			shift
+			;;
 		--freerdp-src)
 			SRC_DIR="$2"
 			shift
@@ -127,6 +131,7 @@ do
     fi
 
     # Build and install the library.
+	ANDROID_NATIVE_API_LEVEL=android-$NDK_TARGET
 	common_run cd $BASE
 	common_run mkdir -p $BUILD_SRC/freerdp-build/$ARCH
 	common_run cd $BUILD_SRC/freerdp-build/$ARCH
