@@ -410,33 +410,6 @@ static int WTSReceiveChannelData(freerdp_peer* client, UINT16 channelId, BYTE* d
 	return status;
 }
 
-void WTSVirtualChannelManagerGetFileDescriptor(HANDLE hServer, void** fds, int* fds_count)
-{
-	void* fd;
-	WTSVirtualChannelManager* vcm = (WTSVirtualChannelManager*) hServer;
-
-	fd = GetEventWaitObject(MessageQueue_Event(vcm->queue));
-
-	if (fd)
-	{
-		fds[*fds_count] = fd;
-		(*fds_count)++;
-	}
-
-#if 0
-	if (vcm->drdynvc_channel)
-	{
-		fd = GetEventWaitObject(vcm->drdynvc_channel->receiveEvent);
-
-		if (fd)
-		{
-			fds[*fds_count] = fd;
-			(*fds_count)++;
-		}
-	}
-#endif
-}
-
 BOOL WTSVirtualChannelManagerCheckFileDescriptor(HANDLE hServer)
 {
 	wMessage message;

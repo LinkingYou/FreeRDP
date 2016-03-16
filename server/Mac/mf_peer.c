@@ -59,7 +59,7 @@ CGImageRef img;
 
 
 
-BOOL mf_peer_get_fds(freerdp_peer* client, void** rfds, int* rcount)
+statis HANDLE mf_peer_get_handle(freerdp_peer* client)
 {
 	if (info_event_queue->pipe_fd[0] == -1)
 		return TRUE;
@@ -420,62 +420,23 @@ void* mf_peer_main_loop(void* arg)
 
 	while (1)
 	{
-		rcount = 0;
+		DWORD status;
+		HANDLE handles[2];
 		
-		if (client->GetFileDescriptor(client, rfds, &rcount) != TRUE)
-		{
-			break;
-		}
+		handles[0] = client->GetEventHanlde(client);
+		handles[1] = WTSVirtualChannelManagerGetEventHandle(context->vcm);
+		handles[2] = mf_peer_get_handle(client);	
 		
-		if (mf_peer_get_fds(client, rfds, &rcount) != TRUE)
-		{
-			break;
-		}
-		
-		WTSVirtualChannelManagerGetFileDescriptor(context->vcm, rfds, &rcount);
-		
-		max_fds = 0;
-		FD_ZERO(&rfds_set);
-		
-		for (i = 0; i < rcount; i++)
-		{
-			fds = (int)(long)(rfds[i]);
-			
-			if (fds > max_fds)
-				max_fds = fds;
-			
-			FD_SET(fds, &rfds_set);
-		}
-		
-		if (max_fds == 0)
-			break;
-		
-		if (select(max_fds + 1, &rfds_set, NULL, NULL, NULL) == -1)
-		{
-			/* these are not really errors */
-			if (!((errno == EAGAIN) ||
-			      (errno == EWOULDBLOCK) ||
-			      (errno == EINPROGRESS) ||
-			      (errno == EINTR))) /* signal occurred */
-			{
-				break;
-			}
-		}
+		status = WaitForMultipleObjects(handles, 
 		
 		if (client->CheckFileDescriptor(client) != TRUE)
-		{
 			break;
-		}
 		
 		if ((mf_peer_check_fds(client)) != TRUE)
-		{
 			break;
-		}
 		
 		if (WTSVirtualChannelManagerCheckFileDescriptor(context->vcm) != TRUE)
-		{
 			break;
-		}
 	}
 	
 	client->Disconnect(client);

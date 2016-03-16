@@ -219,7 +219,7 @@ BOOL rdp_write_monitor_layout_pdu(wStream* s, UINT32 monitorCount, const rdpMoni
 
 int rdp_recv_callback(rdpTransport* transport, wStream* s, void* extra);
 
-int rdp_check_fds(rdpRdp* rdp);
+int rdp_check_handles(rdpRdp* rdp);
 
 rdpRdp* rdp_new(rdpContext* context);
 void rdp_reset(rdpRdp* rdp);

@@ -1577,7 +1577,6 @@ void* xf_client_thread(void* param)
 		nCount = 0;
 		handles[nCount++] = inputEvent;
 
-		if (!settings->AsyncTransport)
 		{
 			DWORD tmp = freerdp_get_event_handles(context, &handles[nCount], 64 - nCount);
 
@@ -1592,17 +1591,14 @@ void* xf_client_thread(void* param)
 
 		waitStatus = WaitForMultipleObjects(nCount, handles, FALSE, 100);
 
-		if (!settings->AsyncTransport)
-		{
-			if (!freerdp_check_event_handles(context))
-			{
-				if (xf_auto_reconnect(instance))
-					continue;
+        if (!freerdp_check_event_handles(context))
+        {
+            if (xf_auto_reconnect(instance))
+                continue;
 
-				WLog_ERR(TAG, "Failed to check FreeRDP file descriptor");
-				break;
-			}
-		}
+            WLog_ERR(TAG, "Failed to check FreeRDP file descriptor");
+            break;
+        }
 
 		if (!settings->AsyncInput)
 		{

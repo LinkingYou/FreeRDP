@@ -47,7 +47,6 @@ extern "C" {
  * WTSVirtualChannelManager functions are FreeRDP extensions to the API.
  */
 
-FREERDP_API void WTSVirtualChannelManagerGetFileDescriptor(HANDLE hServer, void** fds, int* fds_count);
 FREERDP_API BOOL WTSVirtualChannelManagerCheckFileDescriptor(HANDLE hServer);
 FREERDP_API HANDLE WTSVirtualChannelManagerGetEventHandle(HANDLE hServer);
 FREERDP_API BOOL WTSVirtualChannelManagerIsChannelJoined(HANDLE hServer, const char* name);

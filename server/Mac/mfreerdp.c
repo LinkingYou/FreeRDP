@@ -56,45 +56,15 @@ static void mf_server_main_loop(freerdp_listener* instance)
 
 	while (1)
 	{
-		rcount = 0;
+		DWORD status;
+		HANDLE handle = instance->GetEventHandle(instance);
 
-		if (instance->GetFileDescriptor(instance, rfds, &rcount) != TRUE)
-		{
+		status = WaitForSingleObject(handle, INFINITE);
+		if (status != WAIT_OBJECT_0)
 			break;
-		}
-
-		max_fds = 0;
-		FD_ZERO(&rfds_set);
-
-		for (i = 0; i < rcount; i++)
-		{
-			fds = (int)(long)(rfds[i]);
-
-			if (fds > max_fds)
-				max_fds = fds;
-
-			FD_SET(fds, &rfds_set);
-		}
-
-		if (max_fds == 0)
-			break;
-
-		if (select(max_fds + 1, &rfds_set, NULL, NULL, NULL) == -1)
-		{
-			/* these are not really errors */
-			if (!((errno == EAGAIN) ||
-				(errno == EWOULDBLOCK) ||
-				(errno == EINPROGRESS) ||
-				(errno == EINTR))) /* signal occurred */
-			{
-				break;
-			}
-		}
 
 		if (instance->CheckFileDescriptor(instance) != TRUE)
-		{
 			break;
-		}
 	}
 
 	instance->Close(instance);

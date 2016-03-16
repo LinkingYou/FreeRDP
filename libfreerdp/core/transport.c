@@ -739,7 +739,28 @@ out_cleanup:
 	return status;
 }
 
+
 DWORD transport_get_event_handles(rdpTransport* transport, HANDLE* events, DWORD count)
+{
+    DWORD nCount = 0;
+
+    if (!transport)
+        return 0;
+
+    if (!transport->async)
+        return transport_get_event_handles_async(transport, events, count);
+
+    if (events && (nCount < count))
+        events[nCount++] = transport->stopEvent;
+
+
+    if (events && (nCount < count))
+        events[nCount++] = transport->thread;
+
+    return nCount;
+}
+
+DWORD transport_get_event_handles_async(rdpTransport* transport, HANDLE* events, DWORD count)
 {
 	DWORD nCount = 0;
 	DWORD tmp;
@@ -778,22 +799,6 @@ DWORD transport_get_event_handles(rdpTransport* transport, HANDLE* events, DWORD
 	return nCount;
 }
 
-void transport_get_fds(rdpTransport* transport, void** rfds, int* rcount)
-{
-	DWORD index;
-	DWORD nCount;
-	HANDLE events[64];
-
-	nCount = transport_get_event_handles(transport, events, 64);
-
-	*rcount = nCount;
-
-	for (index = 0; index < nCount; index++)
-	{
-		rfds[index] = GetEventWaitObject(events[index]);
-	}
-}
-
 BOOL transport_is_write_blocked(rdpTransport* transport)
 {
 	return BIO_write_blocked(transport->frontBio);
@@ -814,14 +819,14 @@ int transport_drain_output_buffer(rdpTransport* transport)
 	return status;
 }
 
-int transport_check_fds(rdpTransport* transport)
+int transport_check_handles(rdpTransport* transport)
 {
 	int status;
 	int recv_status;
 	wStream* received;
 
 	if (!transport)
-		return -1;
+        return -1;
 
 	while(!freerdp_shall_disconnect(transport->context->instance))
 	{
@@ -837,7 +842,7 @@ int transport_check_fds(rdpTransport* transport)
 		if ((status = transport_read_pdu(transport, transport->ReceiveBuffer)) <= 0)
 		{
 			if (status < 0)
-				WLog_DBG(TAG, "transport_check_fds: transport_read_pdu() - %i", status);
+				WLog_DBG(TAG, "transport_check_handles: transport_read_pdu() - %i", status);
 			return status;
 		}
 
@@ -861,7 +866,7 @@ int transport_check_fds(rdpTransport* transport)
 
 		if (recv_status < 0)
 		{
-			WLog_ERR(TAG, "transport_check_fds: transport->ReceiveCallback() - %i", recv_status);
+			WLog_ERR(TAG, "transport_check_handles: transport->ReceiveCallback() - %i", recv_status);
 			return -1;
 		}
 	}
@@ -983,9 +988,9 @@ static void* transport_client_thread(void* arg)
 	{
 		nCount = 1; /* transport->stopEvent */
 
-		if (!(nCountTmp = freerdp_get_event_handles(context, &handles[nCount], 64 - nCount)))
+        if (!(nCountTmp = freerdp_get_event_handles_async(context, &handles[nCount], 64 - nCount)))
 		{
-			WLog_ERR(TAG, "freerdp_get_event_handles failed");
+            WLog_ERR(TAG, "freerdp_get_event_handles_async failed");
 			break;
 		}
 		nCount += nCountTmp;
@@ -1006,9 +1011,9 @@ static void* transport_client_thread(void* arg)
 		}
 		else if (status > WAIT_OBJECT_0 && status < (WAIT_OBJECT_0 + nCount))
 		{
-			if (!freerdp_check_event_handles(context))
+            if (!freerdp_check_event_handles_async(context))
 			{
-				WLog_ERR(TAG, "freerdp_check_event_handles()");
+                WLog_ERR(TAG, "freerdp_check_event_handles_async()");
 				rdp_set_error_info(rdp, ERRINFO_PEER_DISCONNECTED);
 				break;
 			}

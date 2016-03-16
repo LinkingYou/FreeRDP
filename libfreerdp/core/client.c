@@ -382,25 +382,6 @@ static int freerdp_channels_process_sync(rdpChannels* channels, freerdp* instanc
 	return status;
 }
 
-/**
- * called only from main thread
- */
-BOOL freerdp_channels_get_fds(rdpChannels* channels, freerdp* instance, void** read_fds,
-	int* read_count, void** write_fds, int* write_count)
-{
-	void* pfd;
-
-	pfd = GetEventWaitObject(MessageQueue_Event(channels->queue));
-
-	if (pfd)
-	{
-		read_fds[*read_count] = pfd;
-		(*read_count)++;
-	}
-
-	return TRUE;
-}
-
 void* freerdp_channels_get_static_channel_interface(rdpChannels* channels, const char* name)
 {
 	void* pInterface = NULL;
@@ -442,7 +423,7 @@ int freerdp_channels_process_pending_messages(freerdp* instance)
 /**
  * called only from main thread
  */
-BOOL freerdp_channels_check_fds(rdpChannels* channels, freerdp* instance)
+BOOL freerdp_channels_check_handles(rdpChannels* channels, freerdp* instance)
 {
 	if (WaitForSingleObject(MessageQueue_Event(channels->queue), 0) == WAIT_OBJECT_0)
 	{
@@ -464,7 +445,7 @@ UINT freerdp_channels_disconnect(rdpChannels* channels, freerdp* instance)
 		return 0;
 
 	channels->connected = 0;
-	freerdp_channels_check_fds(channels, instance);
+	freerdp_channels_check_handles(channels, instance);
 
 	/* tell all libraries we are shutting down */
 	for (index = 0; index < channels->clientDataCount; index++)
@@ -505,7 +486,7 @@ void freerdp_channels_close(rdpChannels* channels, freerdp* instance)
 	int index;
 	CHANNEL_CLIENT_DATA* pChannelClientData;
 
-	freerdp_channels_check_fds(channels, instance);
+	freerdp_channels_check_handles(channels, instance);
 
 	/* tell all libraries we are shutting down */
 	for (index = 0; index < channels->clientDataCount; index++)

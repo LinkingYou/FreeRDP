@@ -196,14 +196,7 @@ BOOL freerdp_abort_connect(freerdp* instance)
 	return SetEvent(instance->context->abortEvent);
 }
 
-BOOL freerdp_get_fds(freerdp* instance, void** rfds, int* rcount, void** wfds, int* wcount)
-{
-	rdpRdp* rdp = instance->context->rdp;
-	transport_get_fds(rdp->transport, rfds, rcount);
-	return TRUE;
-}
-
-BOOL freerdp_check_fds(freerdp* instance)
+static BOOL freerdp_check_fds(freerdp* instance)
 {
 	int status;
 	rdpRdp* rdp;
@@ -219,14 +212,14 @@ BOOL freerdp_check_fds(freerdp* instance)
 
 	rdp = instance->context->rdp;
 
-	status = rdp_check_fds(rdp);
+	status = rdp_check_handles(rdp);
 
 	if (status < 0)
 	{
 		TerminateEventArgs e;
 		rdpContext* context = instance->context;
 
-		WLog_DBG(TAG, "rdp_check_fds() - %i", status);
+		WLog_DBG(TAG, "rdp_check_handles() - %i", status);
 		EventArgsInit(&e, "freerdp");
 		e.code = 0;
 		PubSub_OnTerminate(context->pubSub, context, &e);
@@ -239,9 +232,17 @@ BOOL freerdp_check_fds(freerdp* instance)
 
 DWORD freerdp_get_event_handles(rdpContext* context, HANDLE* events, DWORD count)
 {
+    if (context->rdp->transport->async)
+        return transport_get_event_handles(context->rdp->transport, events, count);
+
+    return freerdp_get_event_handles_async(context, events, count);
+}
+
+DWORD freerdp_get_event_handles_async(rdpContext* context, HANDLE* events, DWORD count)
+{
 	DWORD nCount = 0;
 
-	nCount += transport_get_event_handles(context->rdp->transport, events, count);
+    nCount += transport_get_event_handles_async(context->rdp->transport, events, count);
 
 	if (nCount == 0)
 		return 0;
@@ -259,6 +260,14 @@ DWORD freerdp_get_event_handles(rdpContext* context, HANDLE* events, DWORD count
 
 BOOL freerdp_check_event_handles(rdpContext* context)
 {
+    if (!context->rdp->transport->async)
+        return freerdp_check_event_handles_async(context);
+
+    return TRUE;
+}
+
+BOOL freerdp_check_event_handles_async(rdpContext* context)
+{
 	BOOL status;
 
 	status = freerdp_check_fds(context->instance);
@@ -269,10 +278,10 @@ BOOL freerdp_check_event_handles(rdpContext* context)
 		return FALSE;
 	}
 
-	status = freerdp_channels_check_fds(context->channels, context->instance);
+	status = freerdp_channels_check_handles(context->channels, context->instance);
 	if (!status)
 	{
-		WLog_ERR(TAG, "freerdp_channels_check_fds() failed - %i", status);
+		WLog_ERR(TAG, "freerdp_channels_check_handles() failed - %i", status);
 		return FALSE;
 	}
 

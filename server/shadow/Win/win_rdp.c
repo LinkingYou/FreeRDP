@@ -228,7 +228,7 @@ void* shw_client_thread(void* arg)
 			break;
 		}
 
-		if (!freerdp_check_fds(instance))
+		if (!freerdp_check_handles(instance))
 		{
 			WLog_ERR(TAG, "Failed to check FreeRDP file descriptor");
 			break;
@@ -239,7 +239,7 @@ void* shw_client_thread(void* arg)
 			break;
 		}
 
-		if (!freerdp_channels_check_fds(channels, instance))
+		if (!freerdp_channels_check_handles(channels, instance))
 		{
 			WLog_ERR(TAG, "Failed to check channels file descriptor");
 			break;

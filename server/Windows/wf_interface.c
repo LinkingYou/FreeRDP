@@ -110,32 +110,15 @@ DWORD WINAPI wf_server_main_loop(LPVOID lpParam)
 
 	while(wfi->force_all_disconnect == FALSE)
 	{
-		rcount = 0;
+		DWORD status;
+		HANDLE handle = instance->GetEventHandle(instance);
 
-		if (instance->GetFileDescriptor(instance, rfds, &rcount) != TRUE)
+		status = WaitForSingleObject(handle, INFINITE);
+		if (status != WAIT_OBJECT_0)
 		{
-			WLog_ERR(TAG, "Failed to get FreeRDP file descriptor");
+			WLog_ERR(TAG, "Failed to check FreeRDP event handle");
 			break;
 		}
-
-		max_fds = 0;
-		FD_ZERO(&rfds_set);
-
-		for (i = 0; i < rcount; i++)
-		{
-			fds = (int)(long)(rfds[i]);
-
-			if (fds > max_fds)
-				max_fds = fds;
-
-			FD_SET(fds, &rfds_set);
-		}
-
-		if (max_fds == 0)
-			break;
-
-
-		select(max_fds + 1, &rfds_set, NULL, NULL, NULL);
 
 		if (instance->CheckFileDescriptor(instance) != TRUE)
 		{
