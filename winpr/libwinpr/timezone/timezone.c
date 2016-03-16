@@ -21,6 +21,7 @@
 #include "config.h"
 #endif
 
+#include <errno.h>
 #include <winpr/timezone.h>
 #include <winpr/crt.h>
 #include "../log.h"
@@ -1486,31 +1487,42 @@ static UINT64 winpr_windows_gmtime()
 
 static char* winpr_read_unix_timezone_identifier_from_file(FILE* fp)
 {
-	long length;
+	long length = 1;
 	char* tzid = NULL;
+	char* end;
+	char buf[1024];
 
-	if (fseek(fp, 0, SEEK_END) != 0)
-		return NULL;
-	length = ftell(fp);
-	if (fseek(fp, 0, SEEK_SET) != 0)
-		return NULL;
-
-	if (length < 2)
-		return NULL;
-
-	tzid = (char*) malloc(length + 1);
-	if (!tzid)
-		return NULL;
-
-	if (fread(tzid, length, 1, fp) != 1)
+	do
 	{
-		free(tzid);
-		return NULL;
+		while (fgets(buf, sizeof(buf), fp) != NULL)
+		{
+			length += strnlen(buf, sizeof(buf));
+			char* tmp = realloc(tzid, length);
+			if (!tmp)
+				continue; /* Ignore, we just need to finish reading. */
+			tzid = tmp;
+			strcat(tzid, buf);
+		}
 	}
+	while (errno == EINTR);
 
-	tzid[length] = '\0';
-	if (tzid[length - 1] == '\n')
-		tzid[length - 1] = '\0';
+	if (tzid == NULL)
+		return NULL;
+
+	end = &tzid[length-1];
+	while(end > tzid)
+	{
+		switch (*end)
+		{
+			case '\0':
+			case '\r':
+			case '\n':
+				*end-- = '\0';
+				break;
+			default:
+				return tzid;
+		}
+	}
 
 	return tzid;
 }
