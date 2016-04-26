@@ -291,6 +291,11 @@ static INLINE void Stream_SetCapacity(wStream* _s, size_t _c)
 	_s->capacity = _c;
 }
 
+static INLINE size_t Stream_GetRemainingCapacity(wStream* _s)
+{
+	return (_s->capacity - (_s->pointer - _s->buffer));
+}
+
 static INLINE size_t Stream_GetPosition(wStream* _s)
 {
 	return (_s->pointer - _s->buffer);

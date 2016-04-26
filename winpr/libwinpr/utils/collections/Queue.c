@@ -233,7 +233,7 @@ void* Queue_Peek(wQueue* queue)
 	return obj;
 }
 
-static BOOL default_queue_equals(void *obj1, void *obj2)
+static BOOL default_queue_equals(const void *obj1, const void *obj2)
 {
 	return (obj1 == obj2);
 }

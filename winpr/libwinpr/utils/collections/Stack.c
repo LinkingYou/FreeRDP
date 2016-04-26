@@ -185,7 +185,7 @@ void* Stack_Peek(wStack* stack)
 }
 
 
-static BOOL default_stack_equals(void *obj1, void *obj2)
+static BOOL default_stack_equals(const void *obj1, const void *obj2)
 {
 	return (obj1 == obj2);
 }

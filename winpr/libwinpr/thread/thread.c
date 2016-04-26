@@ -265,10 +265,10 @@ static BOOL reset_event(WINPR_THREAD *thread)
 	return status;
 }
 
-static BOOL thread_compare(void* a, void* b)
+static BOOL thread_compare(const void* a, const void* b)
 {
-	pthread_t* p1 = a;
-	pthread_t* p2 = b;
+	const pthread_t* p1 = a;
+	const pthread_t* p2 = b;
 	BOOL rc = pthread_equal(*p1, *p2);
 	return rc;
 }
@@ -396,7 +396,7 @@ HANDLE CreateThread(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize
 #endif
 	thread->pipe_fd[0] = -1;
 	thread->pipe_fd[1] = -1;
-	
+
 #ifdef HAVE_EVENTFD_H
 	thread->pipe_fd[0] = eventfd(0, EFD_NONBLOCK);
 
@@ -411,13 +411,13 @@ HANDLE CreateThread(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize
 		WLog_ERR(TAG, "failed to create thread pipe");
 		goto error_pipefd0;
 	}
-	
+
 	{
 		int flags = fcntl(thread->pipe_fd[0], F_GETFL);
 		fcntl(thread->pipe_fd[0], F_SETFL, flags | O_NONBLOCK);
 	}
 #endif
-	
+
 	if(pthread_mutex_init(&thread->mutex, 0) != 0)
 	{
 		WLog_ERR(TAG, "failed to initialize thread mutex");
@@ -483,7 +483,7 @@ void cleanup_handle(void *obj)
 {
 	int rc;
 	WINPR_THREAD* thread = (WINPR_THREAD*) obj;
-	
+
 
 	rc = pthread_cond_destroy(&thread->threadIsReady);
 	if (rc)

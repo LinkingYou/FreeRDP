@@ -39,7 +39,7 @@ typedef void* (*OBJECT_NEW_FN)(void);
 typedef void (*OBJECT_INIT_FN)(void* obj);
 typedef void (*OBJECT_UNINIT_FN)(void* obj);
 typedef void (*OBJECT_FREE_FN)(void* obj);
-typedef BOOL (*OBJECT_EQUALS_FN)(void* objA, void* objB);
+typedef BOOL (*OBJECT_EQUALS_FN)(const void* objA, const void* objB);
 
 struct _wObject
 {

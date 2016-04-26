@@ -432,7 +432,7 @@ BOOL ListDictionary_SetItemValue(wListDictionary* listDictionary, void* key, voi
 	return status;
 }
 
-static BOOL default_equal_function(void *obj1, void *obj2)
+static BOOL default_equal_function(const void *obj1, const void *obj2)
 {
 	return (obj1 == obj2);
 }

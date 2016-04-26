@@ -435,7 +435,7 @@ int ArrayList_LastIndexOf(wArrayList *arrayList, void *obj, int startIndex, int 
 	return index;
 }
 
-static BOOL ArrayList_DefaultCompare(void *objA, void *objB)
+static BOOL ArrayList_DefaultCompare(const void *objA, const void *objB)
 {
 	return objA == objB ? TRUE : FALSE;
 }
