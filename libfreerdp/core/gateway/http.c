@@ -619,7 +619,6 @@ HttpResponse* http_response_recv(rdpTls* tls)
 	int status;
 	int position;
 	char* line;
-	char* buffer;
 	char* header = NULL;
 	char* payload;
 	int bodyLength;
@@ -635,8 +634,6 @@ HttpResponse* http_response_recv(rdpTls* tls)
 	if (!s)
 		goto out_free;
 
-	buffer = (char*) Stream_Buffer(s);
-
 	response = http_response_new();
 
 	if (!response)
@@ -648,6 +645,11 @@ HttpResponse* http_response_recv(rdpTls* tls)
 	{
 		while (!payloadOffset)
 		{
+			char* buffer;
+
+			if (!Stream_EnsureRemainingCapacity(s, 1024))
+				goto out_error;
+
 			status = BIO_read(tls->bio, Stream_Pointer(s),
 					  Stream_GetRemainingCapacity(s));
 
@@ -666,14 +668,8 @@ HttpResponse* http_response_recv(rdpTls* tls)
 
 			Stream_Seek(s, status);
 
-			if (Stream_GetRemainingLength(s) < 1024)
-			{
-				if (!Stream_EnsureRemainingCapacity(s, 1024))
-					goto out_error;
-				buffer = (char*) Stream_Buffer(s);
-				payload = &buffer[payloadOffset];
-			}
-
+			buffer = (char*) Stream_Buffer(s);
+			payload = &buffer[payloadOffset];
 			position = Stream_GetPosition(s);
 
 			if (position >= 4)
@@ -772,14 +768,6 @@ HttpResponse* http_response_recv(rdpTls* tls)
 			}
 
 			break;
-		}
-
-		if (Stream_GetRemainingLength(s) < 1024)
-		{
-			if (!Stream_EnsureRemainingCapacity(s, 1024))
-				goto out_error;
-			buffer = (char*) Stream_Buffer(s);
-			payload = &buffer[payloadOffset];
 		}
 	}
 
