@@ -74,7 +74,8 @@ BOOL http_request_set_auth_scheme(HttpRequest* request, const char* AuthScheme);
 BOOL http_request_set_auth_param(HttpRequest* request, const char* AuthParam);
 BOOL http_request_set_transfer_encoding(HttpRequest* request, const char* TransferEncoding);
 
-wStream* http_request_write(HttpContext* context, HttpRequest* request);
+wStream* http_request_write(const HttpContext* context,
+			    const HttpRequest* request);
 
 HttpRequest* http_request_new(void);
 void http_request_free(HttpRequest* request);
@@ -96,7 +97,7 @@ struct _http_response
 	wListDictionary* Authenticates;
 };
 
-void http_response_print(HttpResponse* response);
+void http_response_print(const HttpResponse* response);
 
 HttpResponse* http_response_recv(rdpTls* tls);
 
