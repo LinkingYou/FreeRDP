@@ -671,7 +671,7 @@ int TestGdiLine(int argc, char* argv[])
 	for (i = 0; i < number_formats; i++)
 	{
 		HGDI_DC hdc;
-		HGDI_PEN pen;
+		HGDI_PEN pen = NULL;
 		HGDI_BITMAP hBmp = NULL;
 		struct ropMap rop_map[] =
 		{
