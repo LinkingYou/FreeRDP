@@ -266,7 +266,7 @@ typedef struct _CERT_INFO
 	PCERT_EXTENSION rgExtension;
 } CERT_INFO, *PCERT_INFO;
 
-typedef void *HCERTSTORE;
+typedef void* HCERTSTORE;
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTPROV_LEGACY;
 
@@ -278,7 +278,7 @@ typedef struct _CERT_CONTEXT
 	PCERT_INFO pCertInfo;
 	HCERTSTORE hCertStore;
 } CERT_CONTEXT, *PCERT_CONTEXT;
-typedef const CERT_CONTEXT *PCCERT_CONTEXT;
+typedef const CERT_CONTEXT* PCCERT_CONTEXT;
 
 #define CERT_ENCODING_TYPE_MASK			0x0000FFFF
 #define CMSG_ENCODING_TYPE_MASK			0xFFFF0000
@@ -478,7 +478,7 @@ typedef const CERT_CONTEXT *PCCERT_CONTEXT;
 	 CERT_SYSTEM_STORE_LOCATION_SHIFT)
 
 HCERTSTORE CertOpenStore(LPCSTR lpszStoreProvider, DWORD dwMsgAndCertEncodingType,
-		HCRYPTPROV_LEGACY hCryptProv, DWORD dwFlags, const void* pvPara);
+                         HCRYPTPROV_LEGACY hCryptProv, DWORD dwFlags, const void* pvPara);
 
 WINPR_API HCERTSTORE CertOpenSystemStoreW(HCRYPTPROV_LEGACY hProv, LPCWSTR szSubsystemProtocol);
 WINPR_API HCERTSTORE CertOpenSystemStoreA(HCRYPTPROV_LEGACY hProv, LPCSTR szSubsystemProtocol);
@@ -496,14 +496,15 @@ extern "C" {
 #endif
 
 WINPR_API PCCERT_CONTEXT CertFindCertificateInStore(HCERTSTORE hCertStore, DWORD dwCertEncodingType,
-		DWORD dwFindFlags, DWORD dwFindType, const void* pvFindPara, PCCERT_CONTEXT pPrevCertContext);
+        DWORD dwFindFlags, DWORD dwFindType, const void* pvFindPara, PCCERT_CONTEXT pPrevCertContext);
 
-WINPR_API PCCERT_CONTEXT CertEnumCertificatesInStore(HCERTSTORE hCertStore, PCCERT_CONTEXT pPrevCertContext);
+WINPR_API PCCERT_CONTEXT CertEnumCertificatesInStore(HCERTSTORE hCertStore,
+        PCCERT_CONTEXT pPrevCertContext);
 
 WINPR_API DWORD CertGetNameStringW(PCCERT_CONTEXT pCertContext, DWORD dwType,
-		DWORD dwFlags, void* pvTypePara, LPWSTR pszNameString, DWORD cchNameString);
+                                   DWORD dwFlags, void* pvTypePara, LPWSTR pszNameString, DWORD cchNameString);
 WINPR_API DWORD CertGetNameStringA(PCCERT_CONTEXT pCertContext, DWORD dwType,
-		DWORD dwFlags, void* pvTypePara, LPSTR pszNameString, DWORD cchNameString);
+                                   DWORD dwFlags, void* pvTypePara, LPSTR pszNameString, DWORD cchNameString);
 
 #ifdef __cplusplus
 }
@@ -559,10 +560,12 @@ extern "C" {
 WINPR_API BOOL CryptProtectMemory(LPVOID pData, DWORD cbData, DWORD dwFlags);
 WINPR_API BOOL CryptUnprotectMemory(LPVOID pData, DWORD cbData, DWORD dwFlags);
 
-WINPR_API BOOL CryptProtectData(DATA_BLOB* pDataIn, LPCWSTR szDataDescr, DATA_BLOB* pOptionalEntropy,
-		PVOID pvReserved, CRYPTPROTECT_PROMPTSTRUCT* pPromptStruct, DWORD dwFlags, DATA_BLOB* pDataOut);
-WINPR_API BOOL CryptUnprotectData(DATA_BLOB* pDataIn, LPWSTR* ppszDataDescr, DATA_BLOB* pOptionalEntropy,
-		PVOID pvReserved, CRYPTPROTECT_PROMPTSTRUCT* pPromptStruct, DWORD dwFlags, DATA_BLOB* pDataOut);
+WINPR_API BOOL CryptProtectData(DATA_BLOB* pDataIn, LPCWSTR szDataDescr,
+                                DATA_BLOB* pOptionalEntropy,
+                                PVOID pvReserved, CRYPTPROTECT_PROMPTSTRUCT* pPromptStruct, DWORD dwFlags, DATA_BLOB* pDataOut);
+WINPR_API BOOL CryptUnprotectData(DATA_BLOB* pDataIn, LPWSTR* ppszDataDescr,
+                                  DATA_BLOB* pOptionalEntropy,
+                                  PVOID pvReserved, CRYPTPROTECT_PROMPTSTRUCT* pPromptStruct, DWORD dwFlags, DATA_BLOB* pDataOut);
 
 #ifdef __cplusplus
 }
@@ -588,12 +591,14 @@ WINPR_API BOOL CryptUnprotectData(DATA_BLOB* pDataIn, LPWSTR* ppszDataDescr, DAT
 #define CRYPT_STRING_NOCR				0x80000000
 
 BOOL CryptStringToBinaryW(LPCWSTR pszString, DWORD cchString, DWORD dwFlags, BYTE* pbBinary,
-		DWORD* pcbBinary, DWORD* pdwSkip, DWORD* pdwFlags);
+                          DWORD* pcbBinary, DWORD* pdwSkip, DWORD* pdwFlags);
 BOOL CryptStringToBinaryA(LPCSTR pszString, DWORD cchString, DWORD dwFlags, BYTE* pbBinary,
-		DWORD* pcbBinary, DWORD* pdwSkip, DWORD* pdwFlags);
+                          DWORD* pcbBinary, DWORD* pdwSkip, DWORD* pdwFlags);
 
-BOOL CryptBinaryToStringW(CONST BYTE* pbBinary, DWORD cbBinary, DWORD dwFlags, LPWSTR pszString, DWORD* pcchString);
-BOOL CryptBinaryToStringA(CONST BYTE* pbBinary, DWORD cbBinary, DWORD dwFlags, LPSTR pszString, DWORD* pcchString);
+BOOL CryptBinaryToStringW(CONST BYTE* pbBinary, DWORD cbBinary, DWORD dwFlags, LPWSTR pszString,
+                          DWORD* pcchString);
+BOOL CryptBinaryToStringA(CONST BYTE* pbBinary, DWORD cbBinary, DWORD dwFlags, LPSTR pszString,
+                          DWORD* pcchString);
 
 #ifdef UNICODE
 #define CryptStringToBinary	CryptStringToBinaryW
@@ -748,16 +753,16 @@ WINPR_API BOOL winpr_SHA1(const BYTE* input, size_t ilen, BYTE* output, size_t o
  */
 typedef enum
 {
-    WINPR_MD_NONE		= 0,
-    WINPR_MD_MD2		= 1,
-    WINPR_MD_MD4		= 2,
-    WINPR_MD_MD5		= 3,
-    WINPR_MD_SHA1		= 4,
-    WINPR_MD_SHA224		= 5,
-    WINPR_MD_SHA256		= 6,
-    WINPR_MD_SHA384		= 7,
-    WINPR_MD_SHA512		= 8,
-    WINPR_MD_RIPEMD160	= 9
+	WINPR_MD_NONE		= 0,
+	WINPR_MD_MD2		= 1,
+	WINPR_MD_MD4		= 2,
+	WINPR_MD_MD5		= 3,
+	WINPR_MD_SHA1		= 4,
+	WINPR_MD_SHA224		= 5,
+	WINPR_MD_SHA256		= 6,
+	WINPR_MD_SHA384		= 7,
+	WINPR_MD_SHA512		= 8,
+	WINPR_MD_RIPEMD160	= 9
 } WINPR_MD_TYPE;
 
 struct _OPENSSL_EVP_MD_CTX
@@ -771,41 +776,21 @@ struct _OPENSSL_EVP_MD_CTX
 };
 typedef struct _OPENSSL_EVP_MD_CTX OPENSSL_EVP_MD_CTX;
 
-struct _OPENSSL_HMAC_CTX
-{
-	const void* md;
-	OPENSSL_EVP_MD_CTX md_ctx;
-	OPENSSL_EVP_MD_CTX i_ctx;
-	OPENSSL_EVP_MD_CTX o_ctx;
-	unsigned int key_length;
-	unsigned char key[128];
-};
-typedef struct _OPENSSL_HMAC_CTX OPENSSL_HMAC_CTX;
-
-struct _MBEDTLS_HMAC_CTX
-{
-	    const void* md_info;
-	    void* md_ctx;
-	    void* hmac_ctx;
-};
-typedef struct _MBEDTLS_HMAC_CTX MBEDTLS_HMAC_CTX;
-
-union _WINPR_HMAC_CTX
-{
-	OPENSSL_HMAC_CTX openssl;
-	MBEDTLS_HMAC_CTX mbedtls;
-};
-typedef union _WINPR_HMAC_CTX WINPR_HMAC_CTX;
+typedef struct _WINPR_HMAC_CTX WINPR_HMAC_CTX;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-WINPR_API BOOL winpr_HMAC_Init(WINPR_HMAC_CTX* ctx, WINPR_MD_TYPE  md, const BYTE* key, size_t keylen);
+WINPR_API WINPR_HMAC_CTX* winpr_HMAC_CTX_new(void);
+WINPR_API void winpr_HMAC_CTX_free(WINPR_HMAC_CTX* ctx);
+
+WINPR_API BOOL winpr_HMAC_Init(WINPR_HMAC_CTX* ctx, WINPR_MD_TYPE  md, const BYTE* key,
+                               size_t keylen);
 WINPR_API BOOL winpr_HMAC_Update(WINPR_HMAC_CTX* ctx, const BYTE* input, size_t ilen);
 WINPR_API BOOL winpr_HMAC_Final(WINPR_HMAC_CTX* ctx, BYTE* output, size_t ilen);
 WINPR_API BOOL winpr_HMAC(WINPR_MD_TYPE md, const BYTE* key, size_t keylen,
-            const BYTE* input, size_t ilen, BYTE* output, size_t olen);
+                          const BYTE* input, size_t ilen, BYTE* output, size_t olen);
 
 #ifdef __cplusplus
 }
@@ -1019,7 +1004,8 @@ extern "C" {
 #endif
 
 WINPR_API WINPR_CIPHER_CTX* winpr_Cipher_New(int cipher, int op, const BYTE* key, const BYTE* iv);
-WINPR_API BOOL winpr_Cipher_Update(WINPR_CIPHER_CTX* ctx, const BYTE* input, size_t ilen, BYTE* output, size_t* olen);
+WINPR_API BOOL winpr_Cipher_Update(WINPR_CIPHER_CTX* ctx, const BYTE* input, size_t ilen,
+                                   BYTE* output, size_t* olen);
 WINPR_API BOOL winpr_Cipher_Final(WINPR_CIPHER_CTX* ctx, BYTE* output, size_t* olen);
 WINPR_API void winpr_Cipher_Free(WINPR_CIPHER_CTX* ctx);
 
@@ -1035,7 +1021,8 @@ WINPR_API void winpr_Cipher_Free(WINPR_CIPHER_CTX* ctx);
 extern "C" {
 #endif
 
-WINPR_API int winpr_openssl_BytesToKey(int cipher, int md, const BYTE* salt, const BYTE* data, int datal, int count, BYTE* key, BYTE* iv);
+WINPR_API int winpr_openssl_BytesToKey(int cipher, int md, const BYTE* salt, const BYTE* data,
+                                       int datal, int count, BYTE* key, BYTE* iv);
 
 #ifdef __cplusplus
 }

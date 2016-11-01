@@ -46,25 +46,27 @@
 BOOL winpr_MD5_Init(WINPR_MD5_CTX* ctx)
 {
 #if defined(WITH_OPENSSL)
+
 	if (MD5_Init((MD5_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD5_C)
 	mbedtls_md5_init((mbedtls_md5_context*) ctx);
 	mbedtls_md5_starts((mbedtls_md5_context*) ctx);
 #endif
-
 	return TRUE;
 }
 
 BOOL winpr_MD5_Update(WINPR_MD5_CTX* ctx, const BYTE* input, size_t ilen)
 {
 #if defined(WITH_OPENSSL)
+
 	if (MD5_Update((MD5_CTX*) ctx, input, ilen) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD5_C)
 	mbedtls_md5_update((mbedtls_md5_context*) ctx, input, ilen);
 #endif
-
 	return TRUE;
 }
 
@@ -74,13 +76,14 @@ BOOL winpr_MD5_Final(WINPR_MD5_CTX* ctx, BYTE* output, size_t ilen)
 		return FALSE;
 
 #if defined(WITH_OPENSSL)
+
 	if (MD5_Final(output, (MD5_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD5_C)
 	mbedtls_md5_finish((mbedtls_md5_context*) ctx, output);
 	mbedtls_md5_free((mbedtls_md5_context*) ctx);
 #endif
-
 	return TRUE;
 }
 
@@ -90,8 +93,10 @@ BOOL winpr_MD5(const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 
 	if (!winpr_MD5_Init(&ctx))
 		return FALSE;
+
 	if (!winpr_MD5_Update(&ctx, input, ilen))
 		return FALSE;
+
 	return winpr_MD5_Final(&ctx, output, olen);
 }
 
@@ -102,8 +107,10 @@ BOOL winpr_MD5(const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 BOOL winpr_MD4_Init(WINPR_MD4_CTX* ctx)
 {
 #if defined(WITH_OPENSSL)
+
 	if (MD4_Init((MD4_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD4_C)
 	mbedtls_md4_init((mbedtls_md4_context*) ctx);
 	mbedtls_md4_starts((mbedtls_md4_context*) ctx);
@@ -114,12 +121,13 @@ BOOL winpr_MD4_Init(WINPR_MD4_CTX* ctx)
 BOOL winpr_MD4_Update(WINPR_MD4_CTX* ctx, const BYTE* input, size_t ilen)
 {
 #if defined(WITH_OPENSSL)
+
 	if (MD4_Update((MD4_CTX*) ctx, input, ilen) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD4_C)
 	mbedtls_md4_update((mbedtls_md4_context*) ctx, input, ilen);
 #endif
-
 	return TRUE;
 }
 
@@ -129,13 +137,14 @@ BOOL winpr_MD4_Final(WINPR_MD4_CTX* ctx, BYTE* output, size_t olen)
 		return FALSE;
 
 #if defined(WITH_OPENSSL)
+
 	if (MD4_Final(output, (MD4_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_MD4_C)
 	mbedtls_md4_finish((mbedtls_md4_context*) ctx, output);
 	mbedtls_md4_free((mbedtls_md4_context*) ctx);
 #endif
-
 	return TRUE;
 }
 
@@ -145,8 +154,10 @@ BOOL winpr_MD4(const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 
 	if (!winpr_MD4_Init(&ctx))
 		return FALSE;
+
 	if (!winpr_MD4_Update(&ctx, input, ilen))
 		return FALSE;
+
 	return winpr_MD4_Final(&ctx, output, olen);
 }
 
@@ -157,25 +168,27 @@ BOOL winpr_MD4(const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 BOOL winpr_SHA1_Init(WINPR_SHA1_CTX* ctx)
 {
 #if defined(WITH_OPENSSL)
+
 	if (SHA1_Init((SHA_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_SHA1_C)
 	mbedtls_sha1_init((mbedtls_sha1_context*) ctx);
 	mbedtls_sha1_starts((mbedtls_sha1_context*) ctx);
 #endif
-
 	return TRUE;
 }
 
 BOOL winpr_SHA1_Update(WINPR_SHA1_CTX* ctx, const BYTE* input, size_t ilen)
 {
 #if defined(WITH_OPENSSL)
+
 	if (SHA1_Update((SHA_CTX*) ctx, input, ilen) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_SHA1_C)
 	mbedtls_sha1_update((mbedtls_sha1_context*) ctx, input, ilen);
 #endif
-
 	return TRUE;
 }
 
@@ -185,13 +198,14 @@ BOOL winpr_SHA1_Final(WINPR_SHA1_CTX* ctx, BYTE* output, size_t olen)
 		return FALSE;
 
 #if defined(WITH_OPENSSL)
+
 	if (SHA1_Final(output, (SHA_CTX*) ctx) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_SHA1_C)
 	mbedtls_sha1_finish((mbedtls_sha1_context*) ctx, output);
 	mbedtls_sha1_free((mbedtls_sha1_context*) ctx);
 #endif
-
 	return TRUE;
 }
 
@@ -201,20 +215,26 @@ BOOL winpr_SHA1(const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 
 	if (!winpr_SHA1_Init(&ctx))
 		return FALSE;
+
 	if (!winpr_SHA1_Update(&ctx, input, ilen))
 		return FALSE;
+
 	return winpr_SHA1_Final(&ctx, output, olen);
 }
 
 /**
  * HMAC
  */
+#if WITH_OPENSSL
+typedef HMAC_CTX _WINPR_HMAC_CTX;
+#elif WITH_MBEDTLS
+typedef mbedtls_md_context_t _WINPR_HMAC_CTX;
+#endif
 
 #ifdef WITH_OPENSSL
 const EVP_MD* winpr_openssl_get_evp_md(int md)
 {
 	const EVP_MD* evp = NULL;
-
 	OpenSSL_add_all_digests();
 
 	switch (md)
@@ -308,23 +328,68 @@ mbedtls_md_type_t winpr_mbedtls_get_md_type(int md)
 }
 #endif
 
+WINPR_HMAC_CTX* winpr_HMAC_CTX_new(void)
+{
+	_WINPR_HMAC_CTX* hmac;
+#if WITH_OPENSSL
+#if OPENSSL_VERSION_NUMBER > 0x1010002dL
+	hmac = HMAC_CTX_new();
+#else
+	hmac = = calloc(1, sizeof(HMAC_CTX));
+
+	if (hmac)
+		HMAC_CTX_init(hmac);
+
+#endif
+#elif WITH_MBEDTLS
+	hmac = calloc(1, sizeof(mbedtls_md_context_t));
+
+	if (hmac)
+		mbedtls_md_init(hmac);
+
+#endif
+	return (WINPR_HMAC_CTX*)hmac;
+}
+
+void winpr_HMAC_CTX_free(WINPR_HMAC_CTX* ctx)
+{
+	_WINPR_HMAC_CTX* hmac = (_WINPR_HMAC_CTX*)ctx;
+#if WITH_OPENSSL
+#if OPENSSL_VERSION_NUMBER > 0x1010002dL
+	HMAC_CTX_free(hmac);
+#else
+
+	if (hmac)
+		HMAC_CTX_cleanup(hmac);
+
+	free(hmac);
+#endif
+#elif WITH_MBEDTLS
+
+	if (hmac)
+		mbedtls_md_free(hmac);
+
+	free(hmac);
+#endif
+}
+
 BOOL winpr_HMAC_Init(WINPR_HMAC_CTX* ctx, WINPR_MD_TYPE md, const BYTE* key, size_t keylen)
 {
+	_WINPR_HMAC_CTX* hmac = (_WINPR_HMAC_CTX*)ctx;
 #if defined(WITH_OPENSSL)
 	const EVP_MD* evp = winpr_openssl_get_evp_md(md);
 
 	if (!evp)
 		return FALSE;
 
-	HMAC_CTX_init((HMAC_CTX*) ctx);
-
 #if (OPENSSL_VERSION_NUMBER < 0x10000000L)
-	HMAC_Init_ex((HMAC_CTX*) ctx, key, keylen, evp, NULL);
+	HMAC_Init_ex(hmac, key, keylen, evp, NULL);
 #else
-	if (HMAC_Init_ex((HMAC_CTX*) ctx, key, keylen, evp, NULL) != 1)
-		return FALSE;
-#endif
 
+	if (HMAC_Init_ex(hmac, key, keylen, evp, NULL) != 1)
+		return FALSE;
+
+#endif
 #elif defined(WITH_MBEDTLS)
 	const mbedtls_md_info_t* md_info;
 	mbedtls_md_type_t md_type = winpr_mbedtls_get_md_type(md);
@@ -333,72 +398,85 @@ BOOL winpr_HMAC_Init(WINPR_HMAC_CTX* ctx, WINPR_MD_TYPE md, const BYTE* key, siz
 	if (!md_info)
 		return FALSE;
 
-	mbedtls_md_init((mbedtls_md_context_t*) ctx);
-
-	if (mbedtls_md_setup((mbedtls_md_context_t*) ctx, md_info, 1) != 0)
+	if (mbedtls_md_setup(hmac, md_info, 1) != 0)
 		return FALSE;
 
-	if (mbedtls_md_hmac_starts((mbedtls_md_context_t*) ctx, key, keylen) != 0)
+	if (mbedtls_md_hmac_starts(hmac, key, keylen) != 0)
 		return FALSE;
+
 #endif
 	return TRUE;
 }
 
 BOOL winpr_HMAC_Update(WINPR_HMAC_CTX* ctx, const BYTE* input, size_t ilen)
 {
+	_WINPR_HMAC_CTX* hmac = (_WINPR_HMAC_CTX*)ctx;
 #if defined(WITH_OPENSSL)
 #if (OPENSSL_VERSION_NUMBER < 0x10000000L)
-	HMAC_Update((HMAC_CTX*) ctx, input, ilen);
+	HMAC_Update(hmac, input, ilen);
 #else
-	if (HMAC_Update((HMAC_CTX*) ctx, input, ilen) != 1)
+
+	if (HMAC_Update(hmac, input, ilen) != 1)
 		return FALSE;
+
 #endif
 #elif defined(WITH_MBEDTLS)
-	if (mbedtls_md_hmac_update((mbedtls_md_context_t*) ctx, input, ilen) != 0)
+
+	if (mbedtls_md_hmac_update(hmac, input, ilen) != 0)
 		return FALSE;
+
 #endif
 	return TRUE;
 }
 
 BOOL winpr_HMAC_Final(WINPR_HMAC_CTX* ctx, BYTE* output, size_t olen)
 {
+	_WINPR_HMAC_CTX* hmac = (_WINPR_HMAC_CTX*)ctx;
 	/* TODO
 	if (olen < ctx->digestLength)
 		return FALSE;
 	*/
-
 #if defined(WITH_OPENSSL)
 #if (OPENSSL_VERSION_NUMBER < 0x10000000L)
-	HMAC_Final((HMAC_CTX*) ctx, output, NULL);
+	HMAC_Final(hmac, output, NULL);
 #else
-	if (HMAC_Final((HMAC_CTX*) ctx, output, NULL) != 1)
-		return FALSE;
-#endif
-	HMAC_CTX_cleanup((HMAC_CTX*) ctx);
-#elif defined(WITH_MBEDTLS)
-	if (mbedtls_md_hmac_finish((mbedtls_md_context_t*) ctx, output) != 0)
+
+	if (HMAC_Final(hmac, output, NULL) != 1)
 		return FALSE;
 
-	mbedtls_md_free((mbedtls_md_context_t*) ctx);
+#endif
+#elif defined(WITH_MBEDTLS)
+
+	if (mbedtls_md_hmac_finish(hmac, output) != 0)
+		return FALSE;
+
 #endif
 	return TRUE;
 }
 
 BOOL winpr_HMAC(WINPR_MD_TYPE md, const BYTE* key, size_t keylen,
-			const BYTE* input, size_t ilen, BYTE* output, size_t olen)
+                const BYTE* input, size_t ilen, BYTE* output, size_t olen)
 {
-	WINPR_HMAC_CTX ctx;
+	BOOL rc = FALSE;
+	WINPR_HMAC_CTX* ctx;
+	ctx = winpr_HMAC_CTX_new();
 
-	if (!winpr_HMAC_Init(&ctx, md, key, keylen))
-		return FALSE;
+	if (!ctx)
+		goto fail;
 
-	if (!winpr_HMAC_Update(&ctx, input, ilen))
-		return FALSE;
+	if (!winpr_HMAC_Init(ctx, md, key, keylen))
+		goto fail;
 
-	if (!winpr_HMAC_Final(&ctx, output, olen))
-		return FALSE;
+	if (!winpr_HMAC_Update(ctx, input, ilen))
+		goto fail;
 
-	return TRUE;
+	if (!winpr_HMAC_Final(ctx, output, olen))
+		goto fail;
+
+	rc = TRUE;
+fail:
+	winpr_HMAC_CTX_free(ctx);
+	return rc;
 }
 
 /**
@@ -417,6 +495,7 @@ BOOL winpr_Digest_Init(WINPR_DIGEST_CTX* ctx, WINPR_MD_TYPE md)
 
 	if (EVP_DigestInit_ex((EVP_MD_CTX*) ctx, evp, NULL) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS)
 	const mbedtls_md_info_t* md_info;
 	mbedtls_md_type_t md_type = winpr_mbedtls_get_md_type(md);
@@ -432,6 +511,7 @@ BOOL winpr_Digest_Init(WINPR_DIGEST_CTX* ctx, WINPR_MD_TYPE md)
 
 	if (mbedtls_md_starts((mbedtls_md_context_t*) ctx) != 0)
 		return FALSE;
+
 #endif
 	return TRUE;
 }
@@ -439,11 +519,15 @@ BOOL winpr_Digest_Init(WINPR_DIGEST_CTX* ctx, WINPR_MD_TYPE md)
 BOOL winpr_Digest_Update(WINPR_DIGEST_CTX* ctx, const BYTE* input, size_t ilen)
 {
 #if defined(WITH_OPENSSL)
+
 	if (EVP_DigestUpdate((EVP_MD_CTX*) ctx, input, ilen) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS)
+
 	if (mbedtls_md_update((mbedtls_md_context_t*) ctx, input, ilen) != 0)
 		return FALSE;
+
 #endif
 	return TRUE;
 }
@@ -454,7 +538,9 @@ BOOL winpr_Digest_Final(WINPR_DIGEST_CTX* ctx, BYTE* output, size_t olen)
 #if defined(WITH_OPENSSL)
 	if (EVP_DigestFinal_ex((EVP_MD_CTX*) ctx, output, NULL) != 1)
 		return FALSE;
+
 #elif defined(WITH_MBEDTLS)
+
 	if (mbedtls_md_finish((mbedtls_md_context_t*) ctx, output) != 0)
 		return FALSE;
 
