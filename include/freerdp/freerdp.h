@@ -305,6 +305,10 @@ FREERDP_API freerdp* freerdp_channel_get_instance(void);
 FREERDP_API rdpContext* freerdp_channel_get_context(void);
 FREERDP_API rdpChannels* freerdp_channel_get_channels_context(void);
 
+FREERDP_API void freerdp_channel_register_channel_context(void* context);
+FREERDP_API void freerdp_channel_unregister_channel_context(void* context);
+FREERDP_API void* freerdp_channel_get_channel_context(void);
+
 FREERDP_API BOOL freerdp_get_fds(freerdp* instance, void** rfds, int* rcount,
                                  void** wfds, int* wcount);
 FREERDP_API BOOL freerdp_check_fds(freerdp* instance);

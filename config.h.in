@@ -49,6 +49,7 @@
 #cmakedefine WITH_OPENSLES
 #cmakedefine WITH_GSM
 #cmakedefine WITH_MEDIA_FOUNDATION
+#cmakedefine WITH_HANDLE_LISTS
 
 /* Plugins */
 #cmakedefine BUILTIN_CHANNELS

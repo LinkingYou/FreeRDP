@@ -33,8 +33,6 @@
 
 #include "remdesk_main.h"
 
-static WINPR_TLS remdeskPlugin* s_TLSPluginContext = NULL;
-
 static RemdeskClientContext* remdesk_get_client_interface(
     remdeskPlugin* remdesk)
 {
@@ -806,7 +804,7 @@ static VOID VCAPITYPE remdesk_virtual_channel_open_event(DWORD openHandle,
         UINT event,
         LPVOID pData, UINT32 dataLength, UINT32 totalLength, UINT32 dataFlags)
 {
-	remdeskPlugin* remdesk = s_TLSPluginContext;
+	remdeskPlugin* remdesk = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!remdesk || (remdesk->OpenHandle != openHandle))
@@ -980,6 +978,7 @@ static UINT remdesk_virtual_channel_event_disconnected(remdeskPlugin* remdesk)
 
 static void remdesk_virtual_channel_event_terminated(remdeskPlugin* remdesk)
 {
+	freerdp_channel_unregister_channel_context(remdesk);
 	remdesk->InitHandle = 0;
 	free(remdesk);
 }
@@ -988,7 +987,7 @@ static VOID VCAPITYPE remdesk_virtual_channel_init_event(LPVOID pInitHandle,
         UINT event, LPVOID pData,
         UINT dataLength)
 {
-	remdeskPlugin* remdesk = s_TLSPluginContext;
+	remdeskPlugin* remdesk = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!remdesk || (remdesk->InitHandle != pInitHandle))
@@ -1090,7 +1089,7 @@ BOOL VCAPITYPE VirtualChannelEntry(PCHANNEL_ENTRY_POINTS pEntryPoints)
 	        (remdesk->channelEntryPoints.ppInterface);
 	remdesk->channelEntryPoints.ppInterface = &
 	        (remdesk->channelEntryPoints.pInterface);
-	s_TLSPluginContext = remdesk;
+	freerdp_channel_register_channel_context(remdesk);
 	return TRUE;
 error_out:
 

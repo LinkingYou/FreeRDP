@@ -93,8 +93,6 @@ struct rdpsnd_plugin
 	rdpContext* rdpcontext;
 };
 
-static WINPR_TLS rdpsndPlugin* s_TLSPluginContext = NULL;
-
 /**
  * Function description
  *
@@ -1209,7 +1207,7 @@ static VOID VCAPITYPE rdpsnd_virtual_channel_open_event(DWORD openHandle,
         UINT event,
         LPVOID pData, UINT32 dataLength, UINT32 totalLength, UINT32 dataFlags)
 {
-	rdpsndPlugin* rdpsnd = s_TLSPluginContext;
+	rdpsndPlugin* rdpsnd = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!rdpsnd || (rdpsnd->OpenHandle != openHandle))
@@ -1408,6 +1406,7 @@ static UINT rdpsnd_virtual_channel_event_disconnected(rdpsndPlugin* rdpsnd)
 
 static void rdpsnd_virtual_channel_event_terminated(rdpsndPlugin* rdpsnd)
 {
+	freerdp_channel_unregister_channel_context(rdpsnd);
 	rdpsnd->InitHandle = 0;
 	free(rdpsnd);
 }
@@ -1415,7 +1414,7 @@ static void rdpsnd_virtual_channel_event_terminated(rdpsndPlugin* rdpsnd)
 static VOID VCAPITYPE rdpsnd_virtual_channel_init_event(LPVOID pInitHandle,
         UINT event, LPVOID pData, UINT dataLength)
 {
-	rdpsndPlugin* plugin = s_TLSPluginContext;
+	rdpsndPlugin* plugin = freerdp_channel_get_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!plugin || (plugin->InitHandle != pInitHandle))
@@ -1513,6 +1512,6 @@ BOOL VCAPITYPE VirtualChannelEntry(PCHANNEL_ENTRY_POINTS pEntryPoints)
 		return FALSE;
 	}
 
-	s_TLSPluginContext = rdpsnd;
+	freerdp_channel_register_channel_context(rdpsnd);
 	return TRUE;
 }

@@ -33,8 +33,6 @@
 #include "rail_orders.h"
 #include "rail_main.h"
 
-static WINPR_TLS railPlugin* s_TLSPluginContext = NULL;
-
 RailClientContext* rail_get_client_interface(railPlugin* rail)
 {
 	RailClientContext* pInterface;
@@ -546,7 +544,7 @@ static VOID VCAPITYPE rail_virtual_channel_open_event(DWORD openHandle,
         UINT event,
         LPVOID pData, UINT32 dataLength, UINT32 totalLength, UINT32 dataFlags)
 {
-	railPlugin* rail = s_TLSPluginContext;
+	railPlugin* rail = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!rail || (rail->OpenHandle != openHandle))
@@ -710,6 +708,7 @@ static UINT rail_virtual_channel_event_disconnected(railPlugin* rail)
 
 static void rail_virtual_channel_event_terminated(railPlugin* rail)
 {
+	freerdp_channel_unregister_channel_context(rail);
 	rail->InitHandle = 0;
 	free(rail);
 }
@@ -717,7 +716,7 @@ static void rail_virtual_channel_event_terminated(railPlugin* rail)
 static VOID VCAPITYPE rail_virtual_channel_init_event(LPVOID pInitHandle,
         UINT event, LPVOID pData, UINT dataLength)
 {
-	railPlugin* rail = s_TLSPluginContext;
+	railPlugin* rail = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!rail || (rail->InitHandle != pInitHandle))
@@ -836,7 +835,7 @@ BOOL VCAPITYPE VirtualChannelEntry(PCHANNEL_ENTRY_POINTS pEntryPoints)
 
 	rail->channelEntryPoints.pInterface = *(rail->channelEntryPoints.ppInterface);
 	rail->channelEntryPoints.ppInterface = &(rail->channelEntryPoints.pInterface);
-	s_TLSPluginContext = rail;
+	freerdp_channel_register_channel_context(rail);
 	return TRUE;
 error_out:
 

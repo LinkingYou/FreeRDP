@@ -50,8 +50,6 @@ static const char* const CB_MSG_TYPE_STRINGS[] =
 	"CB_UNLOCK_CLIPDATA"
 };
 
-static WINPR_TLS cliprdrPlugin* s_TLSPluginContext = NULL;
-
 CliprdrClientContext* cliprdr_get_client_interface(cliprdrPlugin* cliprdr)
 {
 	CliprdrClientContext* pInterface;
@@ -1017,7 +1015,7 @@ static VOID VCAPITYPE cliprdr_virtual_channel_open_event(DWORD openHandle,
         UINT event,
         LPVOID pData, UINT32 dataLength, UINT32 totalLength, UINT32 dataFlags)
 {
-	cliprdrPlugin* cliprdr = s_TLSPluginContext;
+	cliprdrPlugin* cliprdr = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!cliprdr || (cliprdr->OpenHandle != openHandle))
@@ -1180,6 +1178,7 @@ static UINT cliprdr_virtual_channel_event_disconnected(cliprdrPlugin* cliprdr)
  */
 static UINT cliprdr_virtual_channel_event_terminated(cliprdrPlugin* cliprdr)
 {
+	freerdp_channel_unregister_channel_context(cliprdr);
 	free(cliprdr);
 	return CHANNEL_RC_OK;
 }
@@ -1188,7 +1187,7 @@ static VOID VCAPITYPE cliprdr_virtual_channel_init_event(LPVOID pInitHandle,
         UINT event, LPVOID pData,
         UINT dataLength)
 {
-	cliprdrPlugin* cliprdr = s_TLSPluginContext;
+	cliprdrPlugin* cliprdr = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!cliprdr || (cliprdr->InitHandle != pInitHandle))
@@ -1310,6 +1309,6 @@ BOOL VCAPITYPE VirtualChannelEntry(PCHANNEL_ENTRY_POINTS pEntryPoints)
 	        (cliprdr->channelEntryPoints.ppInterface);
 	cliprdr->channelEntryPoints.ppInterface = &
 	        (cliprdr->channelEntryPoints.pInterface);
-	s_TLSPluginContext = cliprdr;
+	freerdp_channel_register_channel_context(cliprdr);
 	return TRUE;
 }

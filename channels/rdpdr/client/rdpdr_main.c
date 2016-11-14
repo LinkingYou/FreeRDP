@@ -75,8 +75,6 @@ struct _DEVICE_DRIVE_EXT
 	char* path;
 };
 
-static WINPR_TLS rdpdrPlugin* s_TLSPluginContext = NULL;
-
 /**
  * Function description
  *
@@ -127,6 +125,7 @@ static void* drive_hotplug_thread_func(void* arg)
 
 static UINT drive_hotplug_thread_terminate(rdpdrPlugin* rdpdr)
 {
+	freerdp_channel_unregister_channel_context(rdpdr);
 	return CHANNEL_RC_OK;
 }
 
@@ -1516,7 +1515,7 @@ static VOID VCAPITYPE rdpdr_virtual_channel_open_event(DWORD openHandle,
         UINT event,
         LPVOID pData, UINT32 dataLength, UINT32 totalLength, UINT32 dataFlags)
 {
-	rdpdrPlugin* rdpdr = s_TLSPluginContext;
+	rdpdrPlugin* rdpdr = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!rdpdr || !pData || (rdpdr->OpenHandle != openHandle))
@@ -1564,7 +1563,7 @@ static void* rdpdr_virtual_channel_client_thread(void* arg)
 	}
 
 	freerdp_channel_init_thread_context(rdpdr->rdpcontext);
-	s_TLSPluginContext = rdpdr;
+	freerdp_channel_register_channel_context(rdpdr);
 
 	if ((error = rdpdr_process_connect(rdpdr)))
 	{
@@ -1711,7 +1710,7 @@ static VOID VCAPITYPE rdpdr_virtual_channel_init_event(LPVOID pInitHandle,
         UINT event,
         LPVOID pData, UINT dataLength)
 {
-	rdpdrPlugin* rdpdr = s_TLSPluginContext;
+	rdpdrPlugin* rdpdr = freerdp_channel_get_channel_context();
 	UINT error = CHANNEL_RC_OK;
 
 	if (!rdpdr || (rdpdr->InitHandle != pInitHandle))
@@ -1798,6 +1797,6 @@ BOOL VCAPITYPE VirtualChannelEntry(PCHANNEL_ENTRY_POINTS pEntryPoints)
 		return FALSE;
 	}
 
-	s_TLSPluginContext = rdpdr;
+	freerdp_channel_register_channel_context(rdpdr);
 	return TRUE;
 }

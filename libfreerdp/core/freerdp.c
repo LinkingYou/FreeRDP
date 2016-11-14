@@ -54,15 +54,66 @@
 /* Thread local storage variables.
  * They need to be initialized in every thread that
  * has to use them. */
+#ifndef WITH_HANDLE_LISTS
 static WINPR_TLS rdpContext* s_TLSContext = NULL;
+static WINPR_TLS void* s_TLSChannelContext = NULL;
+#else
+static wListDictionary* g_rdpContextList = NULL;
+static wListDictionary* g_ChannelContextList = NULL;
+#endif
+
+void freerdp_channel_register_channel_context(void* context)
+{
+#ifndef WITH_HANDLE_LISTS
+	s_TLSChannelContext = context;
+#else
+
+	if (!g_ChannelContextList)
+		g_ChannelContextList = ListDictionary_New(TRUE);
+
+	if (!ListDictionary_Contains(g_ChannelContextList, GetCurrentThreadId()))
+		ListDictionary_Add(g_ChannelContextList, GetCurrentThreadId(), context);
+
+#endif
+}
+
+void freerdp_channel_unregister_channel_context(void* context)
+{
+#ifndef WITH_HANDLE_LISTS
+	s_TLSChannelContext = NULL;
+#else
+	ListDictionary_Remove(g_ChannelContextList, GetCurrentThreadId());
+#endif
+}
+
+void* freerdp_channel_get_channel_context(void)
+{
+#ifndef WITH_HANDLE_LISTS
+	return s_TLSChannelContext;
+#else
+	return ListDictionary_GetItemValue(g_ChannelContextList, GetCurrentThreadId());
+#endif
+}
 
 void freerdp_channel_init_thread_context(rdpContext* context)
 {
+#ifndef WITH_HANDLE_LISTS
 	s_TLSContext = context;
+#else
+
+	if (!g_rdpContextList)
+		g_rdpContextList = ListDictionary_New(TRUE);
+
+	if (!ListDictionary_Contains(g_rdpContextList, GetCurrentThreadId()))
+		ListDictionary_Add(g_rdpContextList, GetCurrentThreadId(), context);
+
+#endif
 }
 
 freerdp* freerdp_channel_get_instance(void)
 {
+#ifndef WITH_HANDLE_LISTS
+
 	if (!s_TLSContext)
 	{
 		WLog_ERR(TAG,
@@ -72,15 +123,34 @@ freerdp* freerdp_channel_get_instance(void)
 	}
 
 	return s_TLSContext->instance;
+#else
+	rdpContext* context = ListDictionary_GetItemValue(g_rdpContextList, GetCurrentThreadId());
+
+	if (!context)
+	{
+		WLog_ERR(TAG,
+		         "Funcion was called from thread that did not call freerdp_channel_init_thread_context");
+		winpr_log_backtrace(TAG, WLOG_ERROR, 20);
+		return NULL;
+	}
+
+	return context->instance;
+#endif
 }
 
 rdpContext* freerdp_channel_get_context(void)
 {
+#ifndef WITH_HANDLE_LISTS
 	return s_TLSContext;
+#else
+	return ListDictionary_GetItemValue(g_rdpContextList, GetCurrentThreadId());
+#endif
 }
 
 rdpChannels* freerdp_channel_get_channels_context(void)
 {
+#ifndef WITH_HANDLE_LISTS
+
 	if (!s_TLSContext)
 	{
 		WLog_ERR(TAG,
@@ -90,6 +160,19 @@ rdpChannels* freerdp_channel_get_channels_context(void)
 	}
 
 	return s_TLSContext->channels;
+#else
+	rdpContext* context = ListDictionary_GetItemValue(g_rdpContextList, GetCurrentThreadId());
+
+	if (!context)
+	{
+		WLog_ERR(TAG,
+		         "Funcion was called from thread that did not call freerdp_channel_init_thread_context");
+		winpr_log_backtrace(TAG, WLOG_ERROR, 20);
+		return NULL;
+	}
+
+	return context->channels;
+#endif
 }
 
 /** Creates a new connection based on the settings found in the "instance" parameter
