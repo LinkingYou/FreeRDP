@@ -258,6 +258,7 @@ static UINT gdi_SurfaceCommand_RemoteFX(rdpGdi* gdi,
 		return ERROR_INTERNAL_ERROR;
 
 	rfx_context_set_pixel_format(surface->codecs->rfx, cmd->format);
+
 	if (!rfx_process_message(surface->codecs->rfx, cmd->data, cmd->length,
 	                         cmd->left, cmd->top,
 	                         surface->data, surface->format, surface->scanline,
@@ -676,7 +677,7 @@ static UINT gdi_CreateSurface(RdpgfxClientContext* context,
 	if (!surface)
 		return ERROR_INTERNAL_ERROR;
 
-	surface->codecs = codecs_new(gdi->context);
+	surface->codecs = gdi->context->codecs;
 
 	if (!surface->codecs)
 	{
@@ -752,7 +753,6 @@ static UINT gdi_DeleteSurface(RdpgfxClientContext* context,
 		progressive_delete_surface_context(codecs->progressive,
 		                                   deleteSurface->surfaceId);
 
-	codecs_free(codecs);
 	return CHANNEL_RC_OK;
 }
 

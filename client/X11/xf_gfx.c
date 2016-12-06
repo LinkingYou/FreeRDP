@@ -208,7 +208,7 @@ static UINT xf_CreateSurface(RdpgfxClientContext* context,
 	if (!surface)
 		return CHANNEL_RC_NO_MEMORY;
 
-	surface->gdi.codecs = codecs_new(gdi->context);
+	surface->gdi.codecs = gdi->context->codecs;
 
 	if (!surface->gdi.codecs)
 	{
@@ -320,7 +320,6 @@ static UINT xf_DeleteSurface(RdpgfxClientContext* context,
 		progressive_delete_surface_context(codecs->progressive,
 		                                   deleteSurface->surfaceId);
 
-	codecs_free(codecs);
 	return CHANNEL_RC_OK;
 }
 
