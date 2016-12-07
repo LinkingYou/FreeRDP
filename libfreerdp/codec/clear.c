@@ -35,27 +35,27 @@
 
 static const UINT32 CLEAR_LOG2_FLOOR[256] =
 {
-	0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
-	4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+    0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
 };
 
 static const BYTE CLEAR_8BIT_MASKS[9] =
 {
-	0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF
+    0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF
 };
 
 static BOOL convert_color(BYTE* dst, UINT32 nDstStep, UINT32 DstFormat,
@@ -124,7 +124,6 @@ static BOOL clear_decompress_subcode_rlex(wStream* s,
 {
 	UINT32 x = 0, y = 0;
 	UINT32 i;
-	UINT32 SrcFormat = PIXEL_FORMAT_BGR24;
 	UINT32 pixelCount;
 	UINT32 nSrcStep;
 	UINT32 bitmapDataOffset;
@@ -156,12 +155,10 @@ static BOOL clear_decompress_subcode_rlex(wStream* s,
 	for (i = 0; i < paletteCount; i++)
 	{
 		BYTE r, g, b;
-		UINT32 color;
 		Stream_Read_UINT8(s, b);
 		Stream_Read_UINT8(s, g);
 		Stream_Read_UINT8(s, r);
-		color = GetColor(SrcFormat, r, g, b, 0xFF);
-		palette[i] = ConvertColor(color, SrcFormat, DstFormat, NULL);
+		palette[i] = GetColor(DstFormat, r, g, b, 0xFF);
 	}
 
 	pixelIndex = 0;
@@ -493,9 +490,9 @@ static BOOL clear_decompress_subcodecs_data(CLEAR_CONTEXT* clear, wStream* s,
 
 		switch (subcodecId)
 		{
-			case 0: /* Uncompressed */
-				{
-					UINT32 nSrcStep = width * GetBytesPerPixel(PIXEL_FORMAT_BGR24);
+		    case 0: /* Uncompressed */
+		        {
+			        UINT32 nSrcStep = width * GetBytesPerPixel(PIXEL_FORMAT_BGR24);
 					UINT32 nSrcSize = nSrcStep * height;
 
 					if (bitmapDataByteCount != nSrcSize)
@@ -513,20 +510,20 @@ static BOOL clear_decompress_subcodecs_data(CLEAR_CONTEXT* clear, wStream* s,
 						return FALSE;
 
 					Stream_Seek(s, bitmapDataByteCount);
-				}
-				break;
+		        }
+			    break;
 
-			case 1: /* NSCodec */
-				if (!clear_decompress_nscodec(clear->nsc, width, height,
+		    case 1: /* NSCodec */
+			    if (!clear_decompress_nscodec(clear->nsc, width, height,
 				                              s, bitmapDataByteCount,
 				                              pDstData, DstFormat, nDstStep,
 				                              nXDstRel, nYDstRel))
 					return FALSE;
 
-				break;
+			    break;
 
-			case 2: /* CLEARCODEC_SUBCODEC_RLEX */
-				if (!clear_decompress_subcode_rlex(s,
+		    case 2: /* CLEARCODEC_SUBCODEC_RLEX */
+			    if (!clear_decompress_subcode_rlex(s,
 				                                   bitmapDataByteCount,
 				                                   width, height,
 				                                   pDstData, DstFormat, nDstStep,
@@ -534,11 +531,11 @@ static BOOL clear_decompress_subcodecs_data(CLEAR_CONTEXT* clear, wStream* s,
 				                                   nDstWidth, nDstHeight))
 					return FALSE;
 
-				break;
+			    break;
 
-			default:
-				WLog_ERR(TAG, "Unknown subcodec ID %lu", subcodecId);
-				return FALSE;
+		    default:
+			    WLog_ERR(TAG, "Unknown subcodec ID %lu", subcodecId);
+			    return FALSE;
 		}
 
 		suboffset += bitmapDataByteCount;
@@ -881,13 +878,13 @@ static BOOL clear_decompress_bands_data(CLEAR_CONTEXT* clear,
 	return TRUE;
 }
 
-static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
-                                        wStream* s, UINT32 glyphFlags,
-                                        UINT32 nWidth, UINT32 nHeight,
-                                        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
-                                        UINT32 nXDst, UINT32 nYDst,
-                                        UINT32 nDstWidth, UINT32 nDstHeight,
-                                        const gdiPalette* palette)
+static BYTE* clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
+        wStream* s, UINT32 glyphFlags,
+        UINT32 nWidth, UINT32 nHeight,
+        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+        UINT32 nXDst, UINT32 nYDst,
+        UINT32 nDstWidth, UINT32 nDstHeight,
+        const gdiPalette* palette)
 {
 	UINT16 glyphIndex = 0;
 
@@ -895,23 +892,23 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 	    !(glyphFlags & CLEARCODEC_FLAG_GLYPH_INDEX))
 	{
 		WLog_ERR(TAG, "Invalid glyph flags %08X", glyphFlags);
-		return FALSE;
+		return NULL;
 	}
 
 	if ((glyphFlags & CLEARCODEC_FLAG_GLYPH_INDEX) == 0)
-		return TRUE;
+		return NULL;
 
 	if ((nWidth * nHeight) > (1024 * 1024))
 	{
 		WLog_ERR(TAG, "glyph too large: %ux%u", nWidth, nHeight);
-		return FALSE;
+		return NULL;
 	}
 
 	if (Stream_GetRemainingLength(s) < 2)
 	{
 		WLog_ERR(TAG, "stream short %lu [%lu expected]", Stream_GetRemainingLength(s),
 		         2);
-		return FALSE;
+		return NULL;
 	}
 
 	Stream_Read_UINT16(s, glyphIndex);
@@ -919,7 +916,7 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 	if (glyphIndex >= 4000)
 	{
 		WLog_ERR(TAG, "Invalid glyphIndex %u", glyphIndex);
-		return FALSE;
+		return NULL;
 	}
 
 	if (glyphFlags & CLEARCODEC_FLAG_GLYPH_HIT)
@@ -931,7 +928,7 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 		if (!glyphEntry)
 		{
 			WLog_ERR(TAG, "clear->GlyphCache[%lu]=NULL", glyphIndex);
-			return FALSE;
+			return NULL;
 		}
 
 		glyphData = (BYTE*) glyphEntry->pixels;
@@ -939,40 +936,40 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 		if (!glyphData)
 		{
 			WLog_ERR(TAG, "clear->GlyphCache[%lu]->pixels=NULL", glyphIndex);
-			return FALSE;
+			return NULL;
 		}
 
 		if ((nWidth * nHeight) > glyphEntry->count)
 		{
 			WLog_ERR(TAG, "(nWidth %lu * nHeight %lu) > glyphEntry->count %lu", nWidth, nHeight,
 			         glyphEntry->count);
-			return FALSE;
+			return NULL;
 		}
 
 		nSrcStep = nWidth * GetBytesPerPixel(clear->format);
-		return convert_color(pDstData, nDstStep, DstFormat,
-		                     nXDst, nYDst, nWidth, nHeight,
-		                     glyphData, nSrcStep, clear->format,
-		                     nDstWidth, nDstHeight, palette);
+		convert_color(pDstData, nDstStep, DstFormat,
+		              nXDst, nYDst, nWidth, nHeight,
+		              glyphData, nSrcStep, clear->format,
+		              nDstWidth, nDstHeight, palette);
+		return NULL;
 	}
 
 	if (glyphFlags & CLEARCODEC_FLAG_GLYPH_INDEX)
 	{
-		BYTE* glyphData;
-		UINT32 nSrcStep;
+		const UINT32 bpp = GetBytesPerPixel(clear->format);
 		CLEAR_GLYPH_ENTRY* glyphEntry = &(clear->GlyphCache[glyphIndex]);
 		glyphEntry->count = nWidth * nHeight;
 
 		if (glyphEntry->count > glyphEntry->size)
 		{
-			UINT32* tmp;
+			BYTE* tmp;
 			glyphEntry->size = glyphEntry->count;
-			tmp = (UINT32*) realloc(glyphEntry->pixels, glyphEntry->size * 4);
+			tmp = realloc(glyphEntry->pixels, glyphEntry->size * bpp);
 
 			if (!tmp)
 			{
-				WLog_ERR(TAG, "glyphEntry->pixels realloc %lu failed!", glyphEntry->size * 4);
-				return FALSE;
+				WLog_ERR(TAG, "glyphEntry->pixels realloc %lu failed!", glyphEntry->size * bpp);
+				return NULL;
 			}
 
 			glyphEntry->pixels = tmp;
@@ -981,20 +978,13 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 		if (!glyphEntry->pixels)
 		{
 			WLog_ERR(TAG, "glyphEntry->pixels=NULL");
-			return FALSE;
+			return NULL;
 		}
 
-		glyphData = (BYTE*) glyphEntry->pixels;
-		nSrcStep = nWidth * GetBytesPerPixel(clear->format);
-
-		if (!convert_color(pDstData, nDstStep, DstFormat,
-		                   nXDst, nYDst, nWidth, nHeight,
-		                   glyphData, nSrcStep, clear->format,
-		                   nDstWidth, nDstHeight, palette))
-			return FALSE;
+		return glyphEntry->pixels;
 	}
 
-	return TRUE;
+	return NULL;
 }
 
 INT32 clear_decompress(CLEAR_CONTEXT* clear, const BYTE* pSrcData,
@@ -1010,6 +1000,7 @@ INT32 clear_decompress(CLEAR_CONTEXT* clear, const BYTE* pSrcData,
 	UINT32 bandsByteCount;
 	UINT32 subcodecByteCount;
 	wStream* s;
+	BYTE* dstData;
 
 	if (!pDstData)
 		return -1002;
@@ -1055,14 +1046,10 @@ INT32 clear_decompress(CLEAR_CONTEXT* clear, const BYTE* pSrcData,
 		clear->ShortVBarStorageCursor = 0;
 	}
 
-	if (!clear_decompress_glyph_data(clear, s, glyphFlags, nWidth,
-	                                 nHeight, pDstData, DstFormat,
-	                                 nDstStep, nXDst, nYDst,
-	                                 nDstWidth, nDstHeight, palette))
-	{
-		WLog_ERR(TAG, "clear_decompress_glyph_data failed!");
-		goto fail;
-	}
+	dstData = clear_decompress_glyph_data(clear, s, glyphFlags, nWidth,
+	                                      nHeight, pDstData, DstFormat,
+	                                      nDstStep, nXDst, nYDst,
+	                                      nDstWidth, nDstHeight, palette);
 
 	/* Read composition payload header parameters */
 	if (Stream_GetRemainingLength(s) < 12)
@@ -1111,6 +1098,14 @@ INT32 clear_decompress(CLEAR_CONTEXT* clear, const BYTE* pSrcData,
 			WLog_ERR(TAG, "clear_decompress_subcodecs_data failed!");
 			goto fail;
 		}
+	}
+
+	if (dstData)
+	{
+		if (!freerdp_image_copy(dstData, clear->format, 0, 0, 0, nWidth, nHeight,
+		                   pDstData, DstFormat, nDstStep, nXDst, nYDst, palette,
+		                   FREERDP_FLIP_NONE))
+		goto fail;
 	}
 
 finish:
