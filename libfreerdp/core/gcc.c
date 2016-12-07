@@ -1090,23 +1090,23 @@ BOOL gcc_read_server_security_data(wStream* s, rdpMcs* mcs)
 	switch (serverEncryptionMethod)
 	{
 		case ENCRYPTION_METHOD_NONE:
-			WLog_DBG(TAG, "Server rdp encryption method: NONE");
+			WLog_INFO(TAG, "Server rdp encryption method: NONE");
 			break;
 
 		case ENCRYPTION_METHOD_40BIT:
-			WLog_DBG(TAG, "Server rdp encryption method: 40BIT");
+			WLog_INFO(TAG, "Server rdp encryption method: 40BIT");
 			break;
 
 		case ENCRYPTION_METHOD_56BIT:
-			WLog_DBG(TAG, "Server rdp encryption method: 56BIT");
+			WLog_INFO(TAG, "Server rdp encryption method: 56BIT");
 			break;
 
 		case ENCRYPTION_METHOD_128BIT:
-			WLog_DBG(TAG, "Server rdp encryption method: 128BIT");
+			WLog_INFO(TAG, "Server rdp encryption method: 128BIT");
 			break;
 
 		case ENCRYPTION_METHOD_FIPS:
-			WLog_DBG(TAG, "Server rdp encryption method: FIPS");
+			WLog_INFO(TAG, "Server rdp encryption method: FIPS");
 			break;
 
 		default:
