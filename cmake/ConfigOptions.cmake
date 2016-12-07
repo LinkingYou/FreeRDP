@@ -96,6 +96,7 @@ else()
 	set(DEFAULT_DEBUG_OPTION "OFF")
 endif()
 
+option(WITH_DEBUG_EXTENDED "Define the maximum log level supported by build." ON)
 option(WITH_DEBUG_CERTIFICATE "Print certificate related debug messages." ${DEFAULT_DEBUG_OPTION})
 option(WITH_DEBUG_CAPABILITIES "Print capability negotiation debug messages." ${DEFAULT_DEBUG_OPTION})
 option(WITH_DEBUG_CHANNELS "Print channel manager debug messages." ${DEFAULT_DEBUG_OPTION})
