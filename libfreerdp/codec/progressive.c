@@ -1115,7 +1115,7 @@ static int progressive_rfx_upgrade_component(PROGRESSIVE_CONTEXT* progressive,
 		if (srlLen)
 			pSrlLen = (int)((((float) aSrlLen) / ((float) srlLen)) * 100.0f);
 
-		WLog_INFO(TAG, "RAW: %d/%d %d%% (%d/%d:%d)\tSRL: %d/%d %d%% (%d/%d:%d)",
+		WLog_DBG(TAG, "RAW: %d/%d %d%% (%d/%d:%d)\tSRL: %d/%d %d%% (%d/%d:%d)",
 		          aRawLen, rawLen, pRawLen, state.raw->position, rawLen * 8,
 		          (rawLen * 8) - state.raw->position,
 		          aSrlLen, srlLen, pSrlLen, state.srl->position, srlLen * 8,
