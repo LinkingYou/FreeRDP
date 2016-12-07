@@ -216,13 +216,6 @@ static UINT xf_CreateSurface(RdpgfxClientContext* context,
 		return CHANNEL_RC_NO_MEMORY;
 	}
 
-	if (!freerdp_client_codecs_prepare(surface->gdi.codecs, FREERDP_CODEC_ALL,
-	                                   createSurface->width, createSurface->height))
-	{
-		free(surface);
-		return ERROR_INTERNAL_ERROR;
-	}
-
 	surface->gdi.surfaceId = createSurface->surfaceId;
 	surface->gdi.width = (UINT32) createSurface->width;
 	surface->gdi.height = (UINT32) createSurface->height;

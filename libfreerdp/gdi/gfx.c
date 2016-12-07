@@ -80,13 +80,6 @@ static UINT gdi_ResetGraphics(RdpgfxClientContext* context,
 		if (!surface || !surface->outputMapped)
 			continue;
 
-		if (!freerdp_client_codecs_reset(surface->codecs, FREERDP_CODEC_ALL,
-		                                 surface->width, surface->height))
-		{
-			free(pSurfaceIds);
-			return ERROR_INTERNAL_ERROR;
-		}
-
 		region16_clear(&surface->invalidRegion);
 	}
 
@@ -685,13 +678,6 @@ static UINT gdi_CreateSurface(RdpgfxClientContext* context,
 		return CHANNEL_RC_NO_MEMORY;
 	}
 
-	if (!freerdp_client_codecs_prepare(surface->codecs, FREERDP_CODEC_ALL,
-	                                   createSurface->width, createSurface->height))
-	{
-		free(surface);
-		return ERROR_INTERNAL_ERROR;
-	}
-
 	surface->surfaceId = createSurface->surfaceId;
 	surface->width = (UINT32) createSurface->width;
 	surface->height = (UINT32) createSurface->height;
@@ -783,9 +769,7 @@ static UINT gdi_SolidFill(RdpgfxClientContext* context,
 	g = solidFill->fillPixel.G;
 	r = solidFill->fillPixel.R;
 	a = solidFill->fillPixel.XA;
-	color = GetColor(PIXEL_FORMAT_ARGB32, r, g, b, a);
-	color = ConvertColor(color, PIXEL_FORMAT_ARGB32, surface->format,
-	                     &gdi->palette);
+	color = GetColor(surface->format, r, g, b, a);
 
 	for (index = 0; index < solidFill->fillRectCount; index++)
 	{
