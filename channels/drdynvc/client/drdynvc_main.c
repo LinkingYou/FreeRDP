@@ -1074,7 +1074,7 @@ static UINT drdynvc_order_recv(drdynvcPlugin* drdynvc, wStream* s)
 	Cmd = (value & 0xf0) >> 4;
 	Sp = (value & 0x0c) >> 2;
 	cbChId = (value & 0x03) >> 0;
-	WLog_DBG(TAG, "order_recv: Cmd=0x%x, Sp=%d cbChId=%d", Cmd, Sp,cbChId);
+	WLog_DBG(TAG, "order_recv: Cmd=0x%x, Sp=%d cbChId=%d", Cmd, Sp, cbChId);
 
 	switch (Cmd)
 	{
@@ -1472,7 +1472,7 @@ BOOL VCAPITYPE VirtualChannelEntryEx(PCHANNEL_ENTRY_POINTS_EX pEntryPoints, PVOI
 		drdynvc->rdpcontext = pEntryPointsEx->context;
 	}
 
-	drdynvc->log = WLog_Get("com.freerdp.channels.drdynvc.client");
+	drdynvc->log = WLog_Get(TAG);
 	WLog_Print(drdynvc->log, WLOG_DEBUG, "VirtualChannelEntryEx");
 	CopyMemory(&(drdynvc->channelEntryPoints), pEntryPoints, sizeof(CHANNEL_ENTRY_POINTS_FREERDP_EX));
 	drdynvc->InitHandle = pInitHandle;

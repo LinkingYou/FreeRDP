@@ -1494,12 +1494,10 @@ BOOL VCAPITYPE VirtualChannelEntryEx(PCHANNEL_ENTRY_POINTS pEntryPoints, PVOID p
 		rdpsnd->rdpcontext = pEntryPointsEx->context;
 	}
 
-	rdpsnd->log = WLog_Get("com.freerdp.channels.rdpsnd.client");
+	rdpsnd->log = WLog_Get(TAG);
 	CopyMemory(&(rdpsnd->channelEntryPoints), pEntryPoints,
 	           sizeof(CHANNEL_ENTRY_POINTS_FREERDP_EX));
-
 	rdpsnd->InitHandle = pInitHandle;
-
 	rc = rdpsnd->channelEntryPoints.pVirtualChannelInitEx(rdpsnd, NULL, pInitHandle,
 	        &rdpsnd->channelDef, 1, VIRTUAL_CHANNEL_VERSION_WIN2000,
 	        rdpsnd_virtual_channel_init_event_ex);

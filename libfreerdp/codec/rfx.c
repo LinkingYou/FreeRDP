@@ -224,8 +224,7 @@ RFX_CONTEXT* rfx_context_new(BOOL encoder)
 	if (!priv)
 		goto error_priv;
 
-	WLog_Init();
-	priv->log = WLog_Get("com.freerdp.codec.rfx");
+	priv->log = WLog_Get(TAG);
 	WLog_OpenAppender(priv->log);
 #ifdef WITH_DEBUG_RFX
 	WLog_SetLogLevel(priv->log, WLOG_DEBUG);

@@ -169,7 +169,7 @@ WINPR_API BOOL WLog_AddStringLogFilters(LPCSTR filter);
 
 static INLINE BOOL WLog_IsLevelActive(wLog* _log, DWORD _log_level)
 {
-	return _log ? _log_level >= WLog_GetLogLevel(_log) : FALSE;
+	return (_log_level >= _WLOG_MIN) && _log && (_log_level >= WLog_GetLogLevel(_log));
 }
 
 WINPR_API BOOL WLog_SetLogAppenderType(wLog* log, DWORD logAppenderType);

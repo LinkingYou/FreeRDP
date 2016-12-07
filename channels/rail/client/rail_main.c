@@ -813,8 +813,7 @@ BOOL VCAPITYPE VirtualChannelEntryEx(PCHANNEL_ENTRY_POINTS pEntryPoints, PVOID p
 		isFreerdp = TRUE;
 	}
 
-	WLog_Init();
-	rail->log = WLog_Get("com.freerdp.channels.rail.client");
+	rail->log = WLog_Get(TAG);
 	WLog_Print(rail->log, WLOG_DEBUG, "VirtualChannelEntryEx");
 	CopyMemory(&(rail->channelEntryPoints), pEntryPoints,
 	           sizeof(CHANNEL_ENTRY_POINTS_FREERDP_EX));

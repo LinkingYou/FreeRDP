@@ -38,6 +38,9 @@
 
 #include "nsc_sse2.h"
 
+#include <freerdp/log.h>
+#define TAG FREERDP_TAG("codec.nsc")
+
 #ifndef NSC_INIT_SIMD
 #define NSC_INIT_SIMD(_nsc_context) do { } while (0)
 #endif
@@ -281,8 +284,7 @@ NSC_CONTEXT* nsc_context_new(void)
 	if (!context->priv)
 		goto error_priv;
 
-	WLog_Init();
-	context->priv->log = WLog_Get("com.freerdp.codec.nsc");
+	context->priv->log = WLog_Get(TAG);
 	WLog_OpenAppender(context->priv->log);
 	context->BitmapData = NULL;
 	context->decode = nsc_decode;

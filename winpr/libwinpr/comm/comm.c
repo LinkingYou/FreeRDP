@@ -45,6 +45,8 @@
 
 #include "comm_ioctl.h"
 
+#include "../log.h"
+#define TAG WINPR_TAG("comm")
 
 /**
  * Communication Resources:
@@ -109,7 +111,7 @@ static void _CommInit(void)
 		return;
 	}
 
-	_Log = WLog_Get("com.winpr.comm");
+	_Log = WLog_Get(TAG);
 	assert(_Log != NULL);
 }
 

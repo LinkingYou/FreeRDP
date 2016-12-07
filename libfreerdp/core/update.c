@@ -2022,8 +2022,7 @@ rdpUpdate* update_new(rdpRdp* rdp)
 	if (!update)
 		return NULL;
 
-	WLog_Init();
-	update->log = WLog_Get("com.freerdp.core.update");
+	update->log = WLog_Get(TAG);
 	update->bitmap_update.count = 64;
 	update->bitmap_update.rectangles = (BITMAP_DATA*) calloc(
 	                                       update->bitmap_update.count, sizeof(BITMAP_DATA));

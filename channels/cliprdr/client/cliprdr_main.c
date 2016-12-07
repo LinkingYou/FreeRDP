@@ -1280,7 +1280,7 @@ BOOL VCAPITYPE VirtualChannelEntryEx(PCHANNEL_ENTRY_POINTS pEntryPoints, PVOID p
 		context->rdpcontext = pEntryPointsEx->context;
 	}
 
-	cliprdr->log = WLog_Get("com.freerdp.channels.cliprdr.client");
+	cliprdr->log = WLog_Get(TAG);
 	cliprdr->useLongFormatNames = TRUE;
 	cliprdr->streamFileClipEnabled = FALSE;
 	cliprdr->fileClipNoFilePaths = TRUE;
