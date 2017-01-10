@@ -58,9 +58,9 @@ static const BYTE CLEAR_8BIT_MASKS[9] =
 	0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF
 };
 
-static BOOL convert_color(BYTE* dst, UINT32 nDstStep, UINT32 DstFormat,
+static BOOL convert_color(BYTE* dst, UINT32 nDstStep, const UINT32 DstFormat,
                           UINT32 nXDst, UINT32 nYDst, UINT32 nWidth, UINT32 nHeight,
-                          const BYTE* src, UINT32 nSrcStep, UINT32 SrcFormat,
+                          const BYTE* src, UINT32 nSrcStep, const UINT32 SrcFormat,
                           UINT32 nDstWidth, UINT32 nDstHeight, const gdiPalette* palette)
 {
 	UINT32 x, y;
@@ -97,7 +97,7 @@ static BOOL convert_color(BYTE* dst, UINT32 nDstStep, UINT32 DstFormat,
 static BOOL clear_decompress_nscodec(NSC_CONTEXT* nsc, UINT32 width,
                                      UINT32 height,
                                      wStream* s, UINT32 bitmapDataByteCount,
-                                     BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+                                     BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
                                      UINT32 nXDstRel, UINT32 nYDstRel)
 {
 	BOOL rc;
@@ -119,7 +119,7 @@ static BOOL clear_decompress_nscodec(NSC_CONTEXT* nsc, UINT32 width,
 static BOOL clear_decompress_subcode_rlex(wStream* s,
         UINT32 bitmapDataByteCount,
         UINT32 width, UINT32 height,
-        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+        BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
         UINT32 nXDstRel, UINT32 nYDstRel, UINT32 nDstWidth, UINT32 nDstHeight)
 {
 	UINT32 x = 0, y = 0;
@@ -305,7 +305,7 @@ static BOOL clear_decompress_residual_data(CLEAR_CONTEXT* clear,
         wStream* s,
         UINT32 residualByteCount,
         UINT32 nWidth, UINT32 nHeight,
-        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+        BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
         UINT32 nXDst, UINT32 nYDst,
         UINT32 nDstWidth, UINT32 nDstHeight,
         const gdiPalette* palette)
@@ -405,7 +405,7 @@ static BOOL clear_decompress_residual_data(CLEAR_CONTEXT* clear,
 
 static BOOL clear_decompress_subcodecs_data(CLEAR_CONTEXT* clear, wStream* s,
         UINT32 subcodecByteCount, UINT32 nWidth, UINT32 nHeight,
-        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+        BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
         UINT32 nXDst, UINT32 nYDst, UINT32 nDstWidth, UINT32 nDstHeight,
         const gdiPalette* palette)
 {
@@ -572,7 +572,7 @@ static BOOL resize_vbar_entry(CLEAR_CONTEXT* clear, CLEAR_VBAR_ENTRY* vBarEntry)
 static BOOL clear_decompress_bands_data(CLEAR_CONTEXT* clear,
                                         wStream* s, UINT32 bandsByteCount,
                                         UINT32 nWidth, UINT32 nHeight,
-                                        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+                                        BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
                                         UINT32 nXDst, UINT32 nYDst)
 {
 	UINT32 i, y;
@@ -870,7 +870,7 @@ static BOOL clear_decompress_bands_data(CLEAR_CONTEXT* clear,
 static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
                                         wStream* s, UINT32 glyphFlags,
                                         UINT32 nWidth, UINT32 nHeight,
-                                        BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+                                        BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
                                         UINT32 nXDst, UINT32 nYDst,
                                         UINT32 nDstWidth, UINT32 nDstHeight,
                                         const gdiPalette* palette, BYTE** ppGlyphData)
@@ -932,7 +932,8 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 
 		if ((nWidth * nHeight) > glyphEntry->count)
 		{
-			WLog_ERR(TAG, "(nWidth %"PRIu32" * nHeight %"PRIu32") > glyphEntry->count %"PRIu32"", nWidth, nHeight,
+			WLog_ERR(TAG, "(nWidth %"PRIu32" * nHeight %"PRIu32") > glyphEntry->count %"PRIu32"", nWidth,
+			         nHeight,
 			         glyphEntry->count);
 			return FALSE;
 		}
@@ -980,7 +981,7 @@ static BOOL clear_decompress_glyph_data(CLEAR_CONTEXT* clear,
 	return TRUE;
 }
 
-static INLINE BOOL updateContextFormat(CLEAR_CONTEXT* clear, UINT32 DstFormat)
+static INLINE BOOL updateContextFormat(CLEAR_CONTEXT* clear, const UINT32 DstFormat)
 {
 	if (!clear || !clear->nsc)
 		return FALSE;
@@ -991,7 +992,7 @@ static INLINE BOOL updateContextFormat(CLEAR_CONTEXT* clear, UINT32 DstFormat)
 
 INT32 clear_decompress(CLEAR_CONTEXT* clear, const BYTE* pSrcData,
                        UINT32 SrcSize, UINT32 nWidth, UINT32 nHeight,
-                       BYTE* pDstData, UINT32 DstFormat, UINT32 nDstStep,
+                       BYTE* pDstData, const UINT32 DstFormat, UINT32 nDstStep,
                        UINT32 nXDst, UINT32 nYDst, UINT32 nDstWidth,
                        UINT32 nDstHeight, const gdiPalette* palette)
 {
