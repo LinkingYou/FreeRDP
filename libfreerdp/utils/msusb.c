@@ -187,56 +187,55 @@ out_error:
 	return NULL;
 }
 
-int msusb_msinterface_write(MSUSB_INTERFACE_DESCRIPTOR* MsInterface, BYTE* data,
-                            int* offset)
+BOOL msusb_msinterface_write(MSUSB_INTERFACE_DESCRIPTOR* MsInterface, wStream* out)
 {
 	MSUSB_PIPE_DESCRIPTOR** MsPipes;
-	MSUSB_PIPE_DESCRIPTOR* MsPipe;
-	int pnum = 0, move = 0;
+	int pnum = 0;
+
+	if (!MsInterface || !out)
+		return FALSE;
+
 	/* Length */
-	data_write_UINT16(data, MsInterface->Length);
+	Stream_Write_UINT16(out, MsInterface->Length);
 	/* InterfaceNumber */
-	data_write_BYTE(data + 2, MsInterface->InterfaceNumber);
+	Stream_Write_UINT8(out, MsInterface->InterfaceNumber);
 	/* AlternateSetting */
-	data_write_BYTE(data + 3, MsInterface->AlternateSetting);
+	Stream_Write_UINT8(out, MsInterface->AlternateSetting);
 	/* bInterfaceClass */
-	data_write_BYTE(data + 4, MsInterface->bInterfaceClass);
+	Stream_Write_UINT8(out, MsInterface->bInterfaceClass);
 	/* bInterfaceSubClass */
-	data_write_BYTE(data + 5, MsInterface->bInterfaceSubClass);
+	Stream_Write_UINT8(out, MsInterface->bInterfaceSubClass);
 	/* bInterfaceProtocol */
-	data_write_BYTE(data + 6, MsInterface->bInterfaceProtocol);
+	Stream_Write_UINT8(out, MsInterface->bInterfaceProtocol);
 	/* Padding */
-	data_write_BYTE(data + 7, 0);
+	Stream_Write_UINT8(out, 0);
 	/* InterfaceHandle */
-	data_write_UINT32(data + 8, MsInterface->InterfaceHandle);
+	Stream_Write_UINT32(out, MsInterface->InterfaceHandle);
 	/* NumberOfPipes */
-	data_write_UINT32(data + 12, MsInterface->NumberOfPipes);
-	move += 16;
+	Stream_Write_UINT32(out, MsInterface->NumberOfPipes);
 	/* Pipes */
 	MsPipes = MsInterface->MsPipes;
 
 	for (pnum = 0; pnum < MsInterface->NumberOfPipes; pnum++)
 	{
-		MsPipe = MsPipes[pnum];
+		const MSUSB_PIPE_DESCRIPTOR* MsPipe = MsPipes[pnum];
 		/* MaximumPacketSize */
-		data_write_UINT16(data + move, MsPipe->MaximumPacketSize);
+		Stream_Write_UINT16(out, MsPipe->MaximumPacketSize);
 		/* EndpointAddress */
-		data_write_BYTE(data + move + 2, MsPipe->bEndpointAddress);
+		Stream_Write_UINT8(out, MsPipe->bEndpointAddress);
 		/* Interval */
-		data_write_BYTE(data + move + 3, MsPipe->bInterval);
+		Stream_Write_UINT8(out, MsPipe->bInterval);
 		/* PipeType */
-		data_write_UINT32(data + move + 4, MsPipe->PipeType);
+		Stream_Write_UINT32(out, MsPipe->PipeType);
 		/* PipeHandle */
-		data_write_UINT32(data + move + 8, MsPipe->PipeHandle);
+		Stream_Write_UINT32(out, MsPipe->PipeHandle);
 		/* MaximumTransferSize */
-		data_write_UINT32(data + move + 12, MsPipe->MaximumTransferSize);
+		Stream_Write_UINT32(out, MsPipe->MaximumTransferSize);
 		/* PipeFlags */
-		data_write_UINT32(data + move + 16, MsPipe->PipeFlags);
-		move += 20;
+		Stream_Write_UINT32(out, MsPipe->PipeFlags);
 	}
 
-	*offset += move;
-	return 0;
+	return TRUE;
 }
 
 static MSUSB_INTERFACE_DESCRIPTOR** msusb_msinterface_read_list(BYTE* data,
@@ -259,27 +258,30 @@ static MSUSB_INTERFACE_DESCRIPTOR** msusb_msinterface_read_list(BYTE* data,
 	return MsInterfaces;
 }
 
-int msusb_msconfig_write(MSUSB_CONFIG_DESCRIPTOR* MsConfg, BYTE* data,
-                         int* offset)
+BOOL msusb_msconfig_write(MSUSB_CONFIG_DESCRIPTOR* MsConfg, wStream* out)
 {
 	int inum = 0;
 	MSUSB_INTERFACE_DESCRIPTOR** MsInterfaces;
-	MSUSB_INTERFACE_DESCRIPTOR* MsInterface;
+
+	if (!MsConfg || !out)
+		return FALSE;
+
 	/* ConfigurationHandle*/
-	data_write_UINT32(data + *offset, MsConfg->ConfigurationHandle);
+	Stream_Write_UINT32(out, MsConfg->ConfigurationHandle);
 	/* NumInterfaces*/
-	data_write_UINT32(data + *offset + 4, MsConfg->NumInterfaces);
-	*offset += 8;
+	Stream_Write_UINT32(out, MsConfg->NumInterfaces);
 	/* Interfaces */
 	MsInterfaces = MsConfg->MsInterfaces;
 
 	for (inum = 0; inum < MsConfg->NumInterfaces; inum++)
 	{
-		MsInterface = MsInterfaces[inum];
-		msusb_msinterface_write(MsInterface, data + (*offset), offset);
+		MSUSB_INTERFACE_DESCRIPTOR* MsInterface = MsInterfaces[inum];
+
+		if (!msusb_msinterface_write(MsInterface, out))
+			return FALSE;
 	}
 
-	return 0;
+	return TRUE;
 }
 
 MSUSB_CONFIG_DESCRIPTOR* msusb_msconfig_new()
