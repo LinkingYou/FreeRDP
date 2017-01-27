@@ -64,7 +64,7 @@ static int func_hardware_id_format(IUDEVICE* pdev, char(*HardwareIds)[DEVICE_HAR
 }
 
 static int func_compat_id_format(IUDEVICE* pdev,
-                                 char (*CompatibilityIds)[DEVICE_COMPATIBILITY_ID_SIZE])
+                                 char(*CompatibilityIds)[DEVICE_COMPATIBILITY_ID_SIZE])
 {
 	char str[DEVICE_COMPATIBILITY_ID_SIZE];
 	UINT8 bDeviceClass, bDeviceSubClass, bDeviceProtocol;
@@ -1202,15 +1202,13 @@ static UINT urbdrc_process_channel_notification(URBDRC_CHANNEL_CALLBACK* callbac
 			transfer_data->urbdrc = urbdrc;
 			transfer_data->udevman = urbdrc->udevman;
 			transfer_data->urbdrc = urbdrc;
-			transfer_data->pData = Stream_New(Stream_Pointer(in), Stream_GetRemainingLength(in));
+			transfer_data->pData = Stream_TakeFrom(in);
 
 			if (!transfer_data->pData)
 			{
 				free(transfer_data);
 				return ERROR_OUTOFMEMORY;
 			}
-
-			Stream_SetBuffer(in, NULL);
 
 			if (pthread_create(&thread, 0, urbdrc_new_device_create, transfer_data) != 0)
 			{
@@ -1291,7 +1289,7 @@ static UINT urbdrc_on_data_received(IWTSVirtualChannelCallback* pChannelCallback
 			transfer_data->urbdrc = urbdrc;
 			transfer_data->udevman = udevman;
 			transfer_data->UsbDevice = InterfaceId;
-			transfer_data->pData = Stream_New(Stream_Pointer(data), Stream_GetRemainingLength(data));
+			transfer_data->pData = Stream_TakeFrom(data);
 
 			if (!transfer_data->pData)
 			{
@@ -1299,7 +1297,6 @@ static UINT urbdrc_on_data_received(IWTSVirtualChannelCallback* pChannelCallback
 				return ERROR_OUTOFMEMORY;
 			}
 
-			Stream_SetBuffer(data, NULL);
 			/* To ensure that not too many urb requests at the same time */
 			udevman->wait_urb(udevman);
 #if ISOCH_FIFO
