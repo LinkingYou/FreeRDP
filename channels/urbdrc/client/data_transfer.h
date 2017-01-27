@@ -4,6 +4,7 @@
  *
  * Copyright 2012 Atrust corp.
  * Copyright 2012 Alfred Liu <alfred.liu@atruscorp.com>
+ * Copyright 2017 Armin Novak <akallabeth@posteo.net>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@
 #ifndef URB_DATA_TRANSFER_H
 #define URB_DATA_TRANSFER_H
 
-void *urbdrc_process_udev_data_transfer(void* arg);
+void* urbdrc_process_udev_data_transfer(void* arg);
 
 #endif
 

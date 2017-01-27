@@ -327,6 +327,7 @@ MSUSB_CONFIG_DESCRIPTOR* msusb_msconfig_read(wStream* in,
 	}
 
 	Stream_Read_UINT16(in, MsConfig->wTotalLength);
+	Stream_Seek_UINT8(in);
 	Stream_Read_UINT8(in, MsConfig->bConfigurationValue);
 	MsConfig->NumInterfaces	= NumInterfaces;
 	MsConfig->ConfigurationHandle = 0;

@@ -4,6 +4,7 @@
  *
  * Copyright 2012 Atrust corp.
  * Copyright 2012 Alfred Liu <alfred.liu@atruscorp.com>
+ * Copyright 2017 Armin Novak <akallabeth@posteo.net>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +21,8 @@
 
 
 
-#ifndef __URBDRC_MAIN_H
-#define __URBDRC_MAIN_H
+#ifndef URB_URBDRC_MAIN_H
+#define URB_URBDRC_MAIN_H
 
 #include "searchman.h"
 #include "isoch_queue.h"

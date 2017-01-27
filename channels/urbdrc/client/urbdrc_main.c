@@ -4,6 +4,7 @@
  *
  * Copyright 2012 Atrust corp.
  * Copyright 2012 Alfred Liu <alfred.liu@atruscorp.com>
+ * Copyright 2017 Armin Novak <akallabeth@posteo.net>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +209,7 @@ static void func_lock_isoch_mutex(TRANSFER_DATA*  transfer_data)
 			Stream_Read_UINT16(transfer_data->pData, URB_Function);
 
 			if (URB_Function == URB_FUNCTION_ISOCH_TRANSFER &&
-			    size >= 20)
+			    (size >= 20))
 			{
 				Stream_Read_UINT32(transfer_data->pData, RequestField);
 				noAck = (RequestField & 0x80000000) >> 31;
@@ -1210,6 +1211,8 @@ static UINT urbdrc_process_channel_notification(URBDRC_CHANNEL_CALLBACK* callbac
 				return ERROR_OUTOFMEMORY;
 			}
 
+			Stream_SealLength(transfer_data->pData);
+
 			if (pthread_create(&thread, 0, urbdrc_new_device_create, transfer_data) != 0)
 			{
 				Stream_Free(transfer_data->pData, TRUE);
@@ -1297,6 +1300,7 @@ static UINT urbdrc_on_data_received(IWTSVirtualChannelCallback* pChannelCallback
 				return ERROR_OUTOFMEMORY;
 			}
 
+			Stream_SealLength(transfer_data->pData);
 			/* To ensure that not too many urb requests at the same time */
 			udevman->wait_urb(udevman);
 #if ISOCH_FIFO
