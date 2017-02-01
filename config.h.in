@@ -20,6 +20,7 @@
 #cmakedefine HAVE_PTHREAD_MUTEX_TIMEDLOCK
 #cmakedefine HAVE_VALGRIND_MEMCHECK_H
 #cmakedefine HAVE_EXECINFO_H
+#cmakedefine HAVE_LIBUNWIND_H
 
 /* Features */
 #cmakedefine HAVE_ALIGNED_REQUIRED
