@@ -34,7 +34,11 @@ static int update_recv_surfcmd_surface_bits(rdpUpdate* update, wStream* s, UINT3
 	SURFACE_BITS_COMMAND* cmd = &update->surface_bits_command;
 
 	if (Stream_GetRemainingLength(s) < 20)
+	{
+		WLog_ERR(TAG, "invalid stream length, got %"PRIu32" expected %"PRIu32,
+		         Stream_GetRemainingLength(s), 20);
 		return -1;
+	}
 
 	Stream_Read_UINT16(s, cmd->destLeft);
 	Stream_Read_UINT16(s, cmd->destTop);
@@ -44,7 +48,7 @@ static int update_recv_surfcmd_surface_bits(rdpUpdate* update, wStream* s, UINT3
 	if ((cmd->bpp < 1) || (cmd->bpp > 32))
 	{
 		WLog_ERR(TAG, "invalid bpp value %"PRIu32"", cmd->bpp);
-		return FALSE;
+		return -1;
 	}
 
 	Stream_Seek(s, 2); /* reserved1, reserved2 */
@@ -54,7 +58,11 @@ static int update_recv_surfcmd_surface_bits(rdpUpdate* update, wStream* s, UINT3
 	Stream_Read_UINT32(s, cmd->bitmapDataLength);
 
 	if (Stream_GetRemainingLength(s) < cmd->bitmapDataLength)
+	{
+		WLog_ERR(TAG, "invalid stream length, got %"PRIu32" expected %"PRIu32,
+		         Stream_GetRemainingLength(s), cmd->bitmapDataLength);
 		return -1;
+	}
 
 	pos = Stream_GetPosition(s) + cmd->bitmapDataLength;
 	cmd->bitmapData = Stream_Pointer(s);
@@ -72,7 +80,11 @@ static int update_recv_surfcmd_frame_marker(rdpUpdate* update, wStream* s, UINT3
 	SURFACE_FRAME_MARKER* marker = &update->surface_frame_marker;
 
 	if (Stream_GetRemainingLength(s) < 6)
+	{
+		WLog_ERR(TAG, "invalid stream length, got %"PRIu32" expected %"PRIu32,
+		         Stream_GetRemainingLength(s), 6);
 		return -1;
+	}
 
 	Stream_Read_UINT16(s, marker->frameAction);
 	Stream_Read_UINT32(s, marker->frameId);
