@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef __AUTODETECT_H
-#define __AUTODETECT_H
+#ifndef FREERDP_INTERNAL_AUTODETECT_H
+#define FREERDP_INTERNAL_AUTODETECT_H
 
 #include "rdp.h"
 
@@ -50,6 +50,4 @@ FREERDP_LOCAL BOOL autodetect_send_bandwidth_measure_payload(
 FREERDP_LOCAL BOOL autodetect_send_connecttime_bandwidth_measure_stop(
     rdpContext* context, UINT16 payloadLength, UINT16 sequenceNumber);
 
-#define AUTODETECT_TAG FREERDP_TAG("core.autodetect")
-
-#endif /* __AUTODETECT_H */
+#endif /* FREERDP_AUTODETECT_H */

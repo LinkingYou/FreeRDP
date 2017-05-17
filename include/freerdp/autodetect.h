@@ -21,6 +21,8 @@
 #ifndef FREERDP_AUTODETECT_H
 #define FREERDP_AUTODETECT_H
 
+#include <winpr/wlog.h>
+
 typedef struct rdp_autodetect rdpAutoDetect;
 
 typedef BOOL (*pRTTMeasureRequest)(rdpContext* context, UINT16 sequenceNumber);
@@ -54,7 +56,8 @@ struct rdp_autodetect
 	ALIGN64 pBandwidthMeasureResults BandwidthMeasureResults; /* 20 */
 	ALIGN64 pNetworkCharacteristicsResult NetworkCharacteristicsResult; /* 21 */
 	ALIGN64 pClientBandwidthMeasureResult ClientBandwidthMeasureResult; /* 22 */
-	UINT64 paddingB[32 - 23]; /* 23 */
+	ALIGN64 wLog* log; /* 23 */
+	UINT64 paddingB[32 - 24]; /* 24 */
 };
 
 
