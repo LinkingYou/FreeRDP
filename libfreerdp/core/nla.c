@@ -95,7 +95,7 @@
  *
  */
 
-#define NLA_PKG_NAME	NEGOSSP_NAME
+#define NLA_PKG_NAME	NEGO_SSP_NAME
 
 #define TERMSRV_SPN_PREFIX	"TERMSRV/"
 
@@ -378,7 +378,7 @@ int nla_client_begin(rdpNla* nla)
 
 		if (nla->status)
 		{
-			SECURITY_STATUS status = nla->table->QuerySecurityPackageInfo(NTLMSSP_NAME, &nla->pPackageInfo);
+			SECURITY_STATUS status = nla->table->QuerySecurityPackageInfo(NTLM_SSP_NAME, &nla->pPackageInfo);
 
 			if (status != SEC_E_OK)
 			{
@@ -763,28 +763,33 @@ int nla_server_authenticate(rdpNla* nla)
 
 		if ((nla->status == SEC_I_COMPLETE_AND_CONTINUE) || (nla->status == SEC_I_COMPLETE_NEEDED))
 		{
-			freerdp_peer *peer = nla->instance->context->peer;
+			freerdp_peer* peer = nla->instance->context->peer;
 
 			if (peer->ComputeNtlmHash)
 			{
 				SECURITY_STATUS status;
+				status = nla->table->SetContextAttributes(&nla->context, SECPKG_ATTR_AUTH_NTLM_HASH_CB,
+				         peer->ComputeNtlmHash, 0);
 
-				status = nla->table->SetContextAttributes(&nla->context, SECPKG_ATTR_AUTH_NTLM_HASH_CB, peer->ComputeNtlmHash, 0);
 				if (status != SEC_E_OK)
 				{
-					WLog_ERR(TAG, "SetContextAttributesA(hash cb) status %s [0x%08"PRIX32"]", GetSecurityStatusString(status), status);
+					WLog_ERR(TAG, "SetContextAttributesA(hash cb) status %s [0x%08"PRIX32"]",
+					         GetSecurityStatusString(status), status);
 				}
 
-				status = nla->table->SetContextAttributes(&nla->context, SECPKG_ATTR_AUTH_NTLM_HASH_CB_DATA, peer, 0);
+				status = nla->table->SetContextAttributes(&nla->context, SECPKG_ATTR_AUTH_NTLM_HASH_CB_DATA, peer,
+				         0);
+
 				if (status != SEC_E_OK)
 				{
-					WLog_ERR(TAG, "SetContextAttributesA(hash cb data) status %s [0x%08"PRIX32"]", GetSecurityStatusString(status), status);
+					WLog_ERR(TAG, "SetContextAttributesA(hash cb data) status %s [0x%08"PRIX32"]",
+					         GetSecurityStatusString(status), status);
 				}
 			}
 			else if (nla->SamFile)
 			{
 				nla->table->SetContextAttributes(&nla->context, SECPKG_ATTR_AUTH_NTLM_SAM_FILE, nla->SamFile,
-						strlen(nla->SamFile) + 1);
+				                                 strlen(nla->SamFile) + 1);
 			}
 
 			if (nla->table->CompleteAuthToken)
@@ -825,7 +830,7 @@ int nla_server_authenticate(rdpNla* nla)
 
 			nla->havePubKeyAuth = TRUE;
 			nla->status = nla->table->QueryContextAttributes(&nla->context, SECPKG_ATTR_SIZES,
-			               &nla->ContextSizes);
+			              &nla->ContextSizes);
 
 			if (nla->status != SEC_E_OK)
 			{
@@ -1016,8 +1021,8 @@ SECURITY_STATUS nla_encrypt_public_key_echo(rdpNla* nla)
 		Buffers[0].pvBuffer = nla->pubKeyAuth.pvBuffer;
 		CopyMemory(Buffers[0].pvBuffer, nla->PublicKey.pvBuffer, Buffers[0].cbBuffer);
 	}
-	else if ((strcmp(nla->packageName, NEGOSSP_NAME) != 0) ||
-	         (strcmp(nla->packageName, NTLMSSP_NAME) != 0))
+	else if ((strcmp(nla->packageName, NEGO_SSP_NAME) != 0) ||
+	         (strcmp(nla->packageName, NTLM_SSP_NAME) != 0))
 	{
 		Buffers[0].BufferType = SECBUFFER_TOKEN; /* Signature */
 		Buffers[0].cbBuffer = nla->ContextSizes.cbSecurityTrailer;
@@ -1091,8 +1096,8 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 		Message.ulVersion = SECBUFFER_VERSION;
 		Message.pBuffers = (PSecBuffer) &Buffers;
 	}
-	else if ((strcmp(nla->packageName, NEGOSSP_NAME) == 0) ||
-	         (strcmp(nla->packageName,  NTLMSSP_NAME) == 0))
+	else if ((strcmp(nla->packageName, NEGO_SSP_NAME) == 0) ||
+	         (strcmp(nla->packageName,  NTLM_SSP_NAME) == 0))
 	{
 		CopyMemory(buffer, nla->pubKeyAuth.pvBuffer, length);
 		public_key_length = nla->PublicKey.cbBuffer;
@@ -1121,8 +1126,8 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 		public_key1 = public_key2 = (BYTE*) nla->pubKeyAuth.pvBuffer ;
 		public_key_length = length;
 	}
-	else if ((strcmp(nla->packageName, NEGOSSP_NAME) == 0) ||
-	         (strcmp(nla->packageName, NTLMSSP_NAME) == 0))
+	else if ((strcmp(nla->packageName, NEGO_SSP_NAME) == 0) ||
+	         (strcmp(nla->packageName, NTLM_SSP_NAME) == 0))
 	{
 		public_key1 = (BYTE*) nla->PublicKey.pvBuffer;
 		public_key2 = (BYTE*) Buffers[1].pvBuffer;
@@ -1310,7 +1315,7 @@ BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 	      /* [0] credType (INTEGER) */
 	      ber_read_contextual_tag(s, 0, &length, TRUE) &&
 	      ber_read_integer(s, NULL);
-	      /* [1] credentials (OCTET STRING) */
+	/* [1] credentials (OCTET STRING) */
 	ret = ber_read_contextual_tag(s, 1, &length, TRUE) &&
 	      ber_read_octet_string_tag(s, &ts_password_creds_length) &&
 	      nla_read_ts_password_creds(nla, s);
@@ -1419,13 +1424,13 @@ SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 		Message.ulVersion = SECBUFFER_VERSION;
 		Message.pBuffers = (PSecBuffer) &Buffers;
 	}
-	else if ((strcmp(nla->packageName, NEGOSSP_NAME) == 0) ||
-	         (strcmp(nla->packageName, NTLMSSP_NAME) == 0))
+	else if ((strcmp(nla->packageName, NEGO_SSP_NAME) == 0) ||
+	         (strcmp(nla->packageName, NTLM_SSP_NAME) == 0))
 	{
 		Buffers[0].BufferType = SECBUFFER_TOKEN; /* Signature */
 		Buffers[0].cbBuffer = nla->ContextSizes.cbSecurityTrailer;
 		Buffers[0].pvBuffer = nla->authInfo.pvBuffer;
-		CopyMemory(Buffers[0].pvBuffer, nla->authInfo.pvBuffer, Buffers[0].cbBuffer);
+		MoveMemory(Buffers[0].pvBuffer, nla->authInfo.pvBuffer, Buffers[0].cbBuffer);
 		Buffers[1].BufferType = SECBUFFER_DATA; /* TSCredentials */
 		Buffers[1].cbBuffer = nla->tsCredentials.cbBuffer;
 		Buffers[1].pvBuffer = &((BYTE*) nla->authInfo.pvBuffer)[Buffers[0].cbBuffer];
@@ -1478,8 +1483,8 @@ SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 		Message.ulVersion = SECBUFFER_VERSION;
 		Message.pBuffers = (PSecBuffer) &Buffers;
 	}
-	else if ((strcmp(nla->packageName,  NEGOSSP_NAME) == 0) ||
-	         (strcmp(nla->packageName, NTLMSSP_NAME) == 0))
+	else if ((strcmp(nla->packageName,  NEGO_SSP_NAME) == 0) ||
+	         (strcmp(nla->packageName, NTLM_SSP_NAME) == 0))
 	{
 		CopyMemory(buffer, nla->authInfo.pvBuffer, length);
 		Buffers[0].BufferType = SECBUFFER_TOKEN; /* Signature */
@@ -1870,6 +1875,7 @@ rdpNla* nla_new(freerdp* instance, rdpTransport* transport, rdpSettings* setting
 		return NULL;
 
 	nla->identity = calloc(1, sizeof(SEC_WINNT_AUTH_IDENTITY));
+
 	if (!nla->identity)
 	{
 		free(nla);
