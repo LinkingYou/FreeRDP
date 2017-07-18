@@ -145,7 +145,7 @@ void nla_identity_free(SEC_WINNT_AUTH_IDENTITY* identity)
  * @param credssp
  */
 
-int nla_client_init(rdpNla* nla)
+static int nla_client_init(rdpNla* nla)
 {
 	char* spn;
 	int length;
@@ -435,7 +435,7 @@ int nla_client_begin(rdpNla* nla)
 	return 1;
 }
 
-int nla_client_recv(rdpNla* nla)
+static int nla_client_recv(rdpNla* nla)
 {
 	int status = -1;
 
@@ -580,7 +580,7 @@ int nla_client_recv(rdpNla* nla)
 	return status;
 }
 
-int nla_client_authenticate(rdpNla* nla)
+static int nla_client_authenticate(rdpNla* nla)
 {
 	wStream* s;
 	int status;
@@ -628,7 +628,7 @@ int nla_client_authenticate(rdpNla* nla)
  * @param credssp
  */
 
-int nla_server_init(rdpNla* nla)
+static int nla_server_init(rdpNla* nla)
 {
 	rdpTls* tls = nla->transport->tls;
 
@@ -715,7 +715,7 @@ int nla_server_init(rdpNla* nla)
  * @return 1 if authentication is successful
  */
 
-int nla_server_authenticate(rdpNla* nla)
+static int nla_server_authenticate(rdpNla* nla)
 {
 	if (nla_server_init(nla) < 1)
 		return -1;
@@ -965,7 +965,7 @@ int nla_authenticate(rdpNla* nla)
 		return nla_client_authenticate(nla);
 }
 
-void ap_integer_increment_le(BYTE* number, int size)
+static void ap_integer_increment_le(BYTE* number, int size)
 {
 	int index;
 
@@ -984,7 +984,7 @@ void ap_integer_increment_le(BYTE* number, int size)
 	}
 }
 
-void ap_integer_decrement_le(BYTE* number, int size)
+static void ap_integer_decrement_le(BYTE* number, int size)
 {
 	int index;
 
@@ -1169,7 +1169,7 @@ int nla_sizeof_ts_password_creds(rdpNla* nla)
 	return length;
 }
 
-int nla_sizeof_ts_credentials(rdpNla* nla)
+static int nla_sizeof_ts_credentials(rdpNla* nla)
 {
 	int size = 0;
 	size += ber_sizeof_integer(1);
@@ -1272,7 +1272,7 @@ BOOL nla_read_ts_password_creds(rdpNla* nla, wStream* s)
 	return TRUE;
 }
 
-int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
+static int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
 {
 	int size = 0;
 	int innerSize = nla_sizeof_ts_password_creds(nla);
@@ -1298,7 +1298,7 @@ int nla_write_ts_password_creds(rdpNla* nla, wStream* s)
 	return size;
 }
 
-BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
+static BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 {
 	wStream* s;
 	int length;
@@ -1325,7 +1325,7 @@ BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 	return ret;
 }
 
-int nla_write_ts_credentials(rdpNla* nla, wStream* s)
+static int nla_write_ts_credentials(rdpNla* nla, wStream* s)
 {
 	int size = 0;
 	int passwordSize;
@@ -1348,7 +1348,7 @@ int nla_write_ts_credentials(rdpNla* nla, wStream* s)
  * @param credssp
  */
 
-BOOL nla_encode_ts_credentials(rdpNla* nla)
+static BOOL nla_encode_ts_credentials(rdpNla* nla)
 {
 	wStream* s;
 	int length;
@@ -1403,7 +1403,7 @@ BOOL nla_encode_ts_credentials(rdpNla* nla)
 	return TRUE;
 }
 
-SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
+static SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 {
 	SecBuffer Buffers[2];
 	SecBufferDesc Message;
@@ -1454,7 +1454,7 @@ SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 	return SEC_E_OK;
 }
 
-SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
+static SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 {
 	int length;
 	BYTE* buffer;
@@ -1520,14 +1520,14 @@ SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 	return SEC_E_OK;
 }
 
-int nla_sizeof_nego_token(int length)
+static int nla_sizeof_nego_token(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-int nla_sizeof_nego_tokens(int length)
+static int nla_sizeof_nego_tokens(int length)
 {
 	length = nla_sizeof_nego_token(length);
 	length += ber_sizeof_sequence_tag(length);
@@ -1536,21 +1536,21 @@ int nla_sizeof_nego_tokens(int length)
 	return length;
 }
 
-int nla_sizeof_pub_key_auth(int length)
+static int nla_sizeof_pub_key_auth(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-int nla_sizeof_auth_info(int length)
+static int nla_sizeof_auth_info(int length)
 {
 	length = ber_sizeof_octet_string(length);
 	length += ber_sizeof_contextual_tag(length);
 	return length;
 }
 
-int nla_sizeof_ts_request(int length)
+static int nla_sizeof_ts_request(int length)
 {
 	length += ber_sizeof_integer(2);
 	length += ber_sizeof_contextual_tag(3);
@@ -1651,7 +1651,7 @@ BOOL nla_send(rdpNla* nla)
 	return TRUE;
 }
 
-int nla_decode_ts_request(rdpNla* nla, wStream* s)
+static int nla_decode_ts_request(rdpNla* nla, wStream* s)
 {
 	int length;
 
