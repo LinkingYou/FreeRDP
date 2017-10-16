@@ -17,9 +17,10 @@ def getVersionName = { ->
 ext {
     versionCode = properties.get('VERSION', "10").toInteger()
     minSdk = properties.get('MIN_SDK', "14").toInteger()
-    targetSdk = properties.get('TARGET_SDK', "25").toInteger()
-    compileSdk = properties.get('COMPILE_SDK', "25").toInteger()
-    buildToolsVersion = properties.get('BUILD_TOOLS', "25.0.2")
+    targetSdk = properties.get('TARGET_SDK', "26").toInteger()
+    compileSdk = properties.get('COMPILE_SDK', "26").toInteger()
+    buildToolsVersion = properties.get('BUILD_TOOLS', "26.0.2")
+    withOpenH264 = properties.get('WITH_OPENH264', false)
     versionName = properties.get('VERSION_NAME', getVersionName())
 
     println '----------------- Project configuration -------------------'
@@ -39,7 +40,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:2.3.3'
     }
 }
 

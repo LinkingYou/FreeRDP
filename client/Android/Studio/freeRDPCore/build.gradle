@@ -10,6 +10,24 @@ android {
         vectorDrawables.useSupportLibrary = true
         versionCode = rootProject.ext.versionCode
         versionName = rootProject.ext.versionName
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_ARM_NEON=TRUE",
+                        "-DCMAKE_VERBOSE_MAKEFILE=ON",
+                        "-DWITH_OPENH264=${rootProject.ext.withOpenH264}",
+                        "-DFREERDP_EXTERNAL_PATH=${project.projectDir}/src/main/jniLibs"
+                abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            universalApk true
+        }
     }
 
     buildTypes {
@@ -22,10 +40,16 @@ android {
             renderscriptDebuggable true
         }
     }
+
+    externalNativeBuild {
+        cmake {
+            path "${project.projectDir}/../../../../CMakeLists.txt"
+        }
+    }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:support-v4:25.2.0'
-    compile 'com.android.support:support-vector-drawable:25.2.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:support-vector-drawable:25.3.1'
 }
