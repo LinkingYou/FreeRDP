@@ -77,7 +77,7 @@ IF(ANDROID)
         "freerdp-openssl"
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
+        "lib" "."
     )
 ELSEIF(WIN32 AND NOT CYGWIN)
   # MINGW should go here too
