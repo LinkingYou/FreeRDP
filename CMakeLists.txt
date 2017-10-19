@@ -547,8 +547,7 @@ if(ANDROID)
 
 	# Our custom external libraries
 	list (APPEND CMAKE_FIND_ROOT_PATH ${FREERDP_EXTERNAL_PATH}/${ANDROID_ABI})
-	list (APPEND CMAKE_INCLUDE_PATH ${FREERDP_EXTERNAL_PATH}/${ANDROID_ABI}/include)
-	list (APPEND CMAKE_LIBRARY_PATH ${FREERDP_EXTERNAL_PATH}/${ANDROID_ABI}/ )
+	list (APPEND CMAKE_LIBRARY_PATH ${FREERDP_EXTERNAL_PATH}/${ANDROID_ABI}/)
 
 	if (WITH_GPROF)
 		CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/scripts/gprof_generate.sh.cmake
@@ -588,7 +587,10 @@ if(UNIX OR CYGWIN)
 	if (HAVE_EVENTFD_H)
 		check_symbol_exists(eventfd_read sys/eventfd.h WITH_EVENTFD_READ_WRITE)
 	endif()
-	check_include_files(sys/timerfd.h HAVE_TIMERFD_H)
+	# Android NDK is lying about the availability of functions in its headers.
+	# On older API versions some symbols are declared but not linkable, ensure
+	# we can link a function before declaring it available.
+	check_symbol_exists(timerfd_gettime sys/timerfd.h HAVE_TIMERFD_H)
 	check_include_files(poll.h HAVE_POLL_H)
 	list(APPEND CMAKE_REQUIRED_LIBRARIES m)
 	check_symbol_exists(ceill math.h HAVE_MATH_C99_LONG_DOUBLE)
