@@ -116,7 +116,11 @@
 
 #if defined(USE_MATH) && !defined(TRIO_NO_POWL)
 # if !defined(HAVE_POWL)
-#  if defined(PREDEF_STANDARD_C99) \
+#  if defined(ANDROID)
+#    if defined(powl)
+#     define HAVE_POWL
+#    endif
+#  elif defined(PREDEF_STANDARD_C99) \
    || defined(PREDEF_STANDARD_UNIX03)
 #   define HAVE_POWL
 #  else
