@@ -907,7 +907,7 @@ public class SessionActivity extends AppCompatActivity implements
     }
 
     @Override
-    public int OnVerifiyCertificate(String commonName, String subject, String issuer, String fingerprint, boolean mismatch) {
+    public int OnVerifyCertificate(String commonName, String subject, String issuer, String fingerprint, boolean mismatch) {
         // see if global settings says accept all
         if (ApplicationSettingsActivity.getAcceptAllCertificates(this))
             return 0;

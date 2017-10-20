@@ -334,31 +334,47 @@ public class LibFreeRDP {
         return freerdp_send_clipboard_data(inst, data);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnConnectionSuccess(long inst) {
         if (listener != null)
             listener.OnConnectionSuccess(inst);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnConnectionFailure(long inst) {
         if (listener != null)
             listener.OnConnectionFailure(inst);
+
+        synchronized (mInstanceState) {
+            mInstanceState.remove(inst);
+            mInstanceState.notifyAll();
+        }
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnPreConnect(long inst) {
         if (listener != null)
             listener.OnPreConnect(inst);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnDisconnecting(long inst) {
         if (listener != null)
             listener.OnDisconnecting(inst);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnDisconnected(long inst) {
         if (listener != null)
             listener.OnDisconnected(inst);
+
+        synchronized (mInstanceState) {
+            mInstanceState.remove(inst);
+            mInstanceState.notifyAll();
+        }
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnSettingsChanged(long inst, int width, int height, int bpp) {
         SessionState s = GlobalApp.getSession(inst);
         if (s == null)
@@ -368,6 +384,7 @@ public class LibFreeRDP {
             uiEventListener.OnSettingsChanged(width, height, bpp);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static boolean OnAuthenticate(long inst, StringBuilder username, StringBuilder domain, StringBuilder password) {
         SessionState s = GlobalApp.getSession(inst);
         if (s == null)
@@ -378,6 +395,7 @@ public class LibFreeRDP {
         return false;
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static boolean OnGatewayAuthenticate(long inst, StringBuilder username, StringBuilder
             domain, StringBuilder password) {
         SessionState s = GlobalApp.getSession(inst);
@@ -389,6 +407,7 @@ public class LibFreeRDP {
         return false;
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static int OnVerifyCertificate(long inst, String commonName, String subject,
                                            String issuer, String fingerprint, boolean
                                                    hostMismatch) {
@@ -397,11 +416,12 @@ public class LibFreeRDP {
             return 0;
         UIEventListener uiEventListener = s.getUIEventListener();
         if (uiEventListener != null)
-            return uiEventListener.OnVerifiyCertificate(commonName, subject, issuer, fingerprint,
+            return uiEventListener.OnVerifyCertificate(commonName, subject, issuer, fingerprint,
                     hostMismatch);
         return 0;
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static int OnVerifyChangedCertificate(long inst, String commonName, String subject,
                                                   String issuer, String fingerprint, String oldSubject,
                                                   String oldIssuer, String oldFingerprint) {
@@ -415,6 +435,7 @@ public class LibFreeRDP {
         return 0;
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnGraphicsUpdate(long inst, int x, int y, int width, int height) {
         SessionState s = GlobalApp.getSession(inst);
         if (s == null)
@@ -424,6 +445,7 @@ public class LibFreeRDP {
             uiEventListener.OnGraphicsUpdate(x, y, width, height);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnGraphicsResize(long inst, int width, int height, int bpp) {
         SessionState s = GlobalApp.getSession(inst);
         if (s == null)
@@ -433,6 +455,7 @@ public class LibFreeRDP {
             uiEventListener.OnGraphicsResize(width, height, bpp);
     }
 
+    @SuppressWarnings("unused") /* Called from native */
     private static void OnRemoteClipboardChanged(long inst, String data) {
         SessionState s = GlobalApp.getSession(inst);
         if (s == null)
@@ -446,7 +469,7 @@ public class LibFreeRDP {
         return freerdp_get_version();
     }
 
-    public static interface EventListener {
+    public interface EventListener {
         void OnPreConnect(long instance);
 
         void OnConnectionSuccess(long instance);
@@ -458,7 +481,7 @@ public class LibFreeRDP {
         void OnDisconnected(long instance);
     }
 
-    public static interface UIEventListener {
+    public interface UIEventListener {
         void OnSettingsChanged(int width, int height, int bpp);
 
         boolean OnAuthenticate(StringBuilder username, StringBuilder domain, StringBuilder password);
@@ -466,8 +489,8 @@ public class LibFreeRDP {
         boolean OnGatewayAuthenticate(StringBuilder username, StringBuilder domain, StringBuilder
                 password);
 
-        int OnVerifiyCertificate(String commonName, String subject,
-                                 String issuer, String fingerprint, boolean mismatch);
+        int OnVerifyCertificate(String commonName, String subject,
+                                String issuer, String fingerprint, boolean mismatch);
 
         int OnVerifyChangedCertificate(String commonName, String subject,
                                        String issuer, String fingerprint, String oldSubject,
