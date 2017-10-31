@@ -21,6 +21,7 @@ public class Mouse {
     private final static int PTRFLAGS_DOWN = 0x8000;
     private final static int PTRFLAGS_MOVE = 0x0800;
 
+    private final static int PTRFLAGS_HWHEEL = 0x0400;
     private final static int PTRFLAGS_WHEEL = 0x0200;
     private final static int PTRFLAGS_WHEEL_NEGATIVE = 0x0100;
 
@@ -42,7 +43,7 @@ public class Mouse {
         return PTRFLAGS_MOVE;
     }
 
-    public static int getScrollEvent(Context context, boolean down) {
+    public static int getScrollEvent(Context context, boolean down, boolean horizontal) {
         int flags = PTRFLAGS_WHEEL;
 
         // invert scrolling?
@@ -53,6 +54,11 @@ public class Mouse {
             flags |= (PTRFLAGS_WHEEL_NEGATIVE | 0x0088);
         else
             flags |= 0x0078;
+
+        if (horizontal) {
+            flags |= PTRFLAGS_HWHEEL;
+        }
+
         return flags;
     }
 

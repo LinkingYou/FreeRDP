@@ -237,7 +237,7 @@ public class SessionView extends View {
 
         abstract void onSessionViewMove(int x, int y);
 
-        abstract void onSessionViewScroll(boolean down);
+        abstract void onSessionViewScroll(boolean down, boolean horizontal);
     }
 
     private class SessionGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -325,13 +325,25 @@ public class SessionView extends View {
 
         public boolean onDoubleTouchScroll(MotionEvent e1, MotionEvent e2) {
             // calc if user scrolled up or down (or if any scrolling happened at all)
+            float deltaX = e2.getX() - prevEvent.getX();
             float deltaY = e2.getY() - prevEvent.getY();
+            boolean used = false;
             if (deltaY > TOUCH_SCROLL_DELTA) {
-                sessionViewListener.onSessionViewScroll(true);
-                prevEvent.recycle();
-                prevEvent = MotionEvent.obtain(e2);
+                sessionViewListener.onSessionViewScroll(true, false);
+                used = true;
             } else if (deltaY < -TOUCH_SCROLL_DELTA) {
-                sessionViewListener.onSessionViewScroll(false);
+                sessionViewListener.onSessionViewScroll(false, false);
+                used = true;
+            }
+            if (deltaX > TOUCH_SCROLL_DELTA) {
+                sessionViewListener.onSessionViewScroll(true, true);
+                used = true;
+            } else if (deltaX < -TOUCH_SCROLL_DELTA) {
+                sessionViewListener.onSessionViewScroll(false, true);
+                used = true;
+            }
+
+            if (used) {
                 prevEvent.recycle();
                 prevEvent = MotionEvent.obtain(e2);
             }

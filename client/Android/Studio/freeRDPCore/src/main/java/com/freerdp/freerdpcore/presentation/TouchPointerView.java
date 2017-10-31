@@ -193,7 +193,7 @@ public class TouchPointerView extends ImageView {
 
         abstract void onTouchPointerMove(int x, int y);
 
-        abstract void onTouchPointerScroll(boolean down);
+        abstract void onTouchPointerScroll(boolean down, boolean horizontal);
 
         abstract void onTouchPointerToggleKeyboard();
 
@@ -277,12 +277,26 @@ public class TouchPointerView extends ImageView {
             } else if (pointerScrolling) {
                 // calc if user scrolled up or down (or if any scrolling happened at all)
                 float deltaY = e2.getY() - prevEvent.getY();
+                float deltaX = e2.getX() - prevEvent.getX();
+                boolean used = false;
+
+                if (deltaX > SCROLL_DELTA) {
+                    listener.onTouchPointerScroll(true, true);
+                    used = true;
+                } else if (deltaX < -SCROLL_DELTA) {
+                    listener.onTouchPointerScroll(false, true);
+                    used = true;
+                }
+
                 if (deltaY > SCROLL_DELTA) {
-                    listener.onTouchPointerScroll(true);
-                    prevEvent.recycle();
-                    prevEvent = MotionEvent.obtain(e2);
+                    listener.onTouchPointerScroll(true, false);
+                    used = true;
                 } else if (deltaY < -SCROLL_DELTA) {
-                    listener.onTouchPointerScroll(false);
+                    listener.onTouchPointerScroll(false, false);
+                    used = true;
+                }
+
+                if (used) {
                     prevEvent.recycle();
                     prevEvent = MotionEvent.obtain(e2);
                 }

@@ -1029,9 +1029,9 @@ public class SessionActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSessionViewScroll(boolean down) {
+    public void onSessionViewScroll(boolean down, boolean horizontal) {
         LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0,
-                Mouse.getScrollEvent(this, down));
+                Mouse.getScrollEvent(this, down, horizontal));
     }
 
     // ****************************************************************************
@@ -1083,9 +1083,9 @@ public class SessionActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onTouchPointerScroll(boolean down) {
+    public void onTouchPointerScroll(boolean down, boolean horizontal) {
         LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0,
-                Mouse.getScrollEvent(this, down));
+                Mouse.getScrollEvent(this, down, horizontal));
     }
 
     @Override
@@ -1110,11 +1110,18 @@ public class SessionActivity extends AppCompatActivity implements
         switch (e.getAction()) {
             case MotionEvent.ACTION_SCROLL:
                 final float vScroll = e.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                final float hScroll = e.getAxisValue(MotionEvent.AXIS_HSCROLL);
                 if (vScroll < 0) {
-                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, false));
+                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, false, false));
                 }
                 if (vScroll > 0) {
-                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, true));
+                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, true, false));
+                }
+                if (hScroll < 0) {
+                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, false, true));
+                }
+                if (hScroll > 0) {
+                    LibFreeRDP.sendCursorEvent(session.getInstance(), 0, 0, Mouse.getScrollEvent(this, true, true));
                 }
                 break;
         }
