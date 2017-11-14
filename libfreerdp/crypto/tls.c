@@ -234,7 +234,6 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 	int status = -1;
 	BIO_RDP_TLS* tls = (BIO_RDP_TLS*) BIO_get_data(bio);
 
-
 	if (!tls)
 		return 0;
 
@@ -317,7 +316,6 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 			BIO_clear_retry_flags(bio);
 			status = BIO_ctrl(ssl_wbio, cmd, num, ptr);
 			BIO_copy_next_retry(bio);
-			status = 1;
 			break;
 
 		case BIO_CTRL_PUSH:
@@ -340,6 +338,7 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 			break;
 
 		case BIO_CTRL_POP:
+
 			/* Only detach if we are the BIO explicitly being popped */
 			if (bio == ptr)
 			{
@@ -347,8 +346,10 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 					BIO_free_all(ssl_wbio);
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+
 				if (next_bio)
 					CRYPTO_add(&(bio->next_bio->references), -1, CRYPTO_LOCK_BIO);
+
 				tls->ssl->wbio = tls->ssl->rbio = NULL;
 #else
 				/* OpenSSL 1.1: This will also clear the reference we obtained during push */
@@ -375,7 +376,6 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 			{
 				tls->ssl = (SSL*) ptr;
 				ssl_rbio = SSL_get_rbio(tls->ssl);
-				ssl_wbio = SSL_get_wbio(tls->ssl);
 			}
 
 			if (ssl_rbio)
@@ -392,7 +392,6 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 			}
 
 			BIO_set_init(bio, 1);
-
 			status = 1;
 			break;
 
@@ -437,16 +436,13 @@ static long bio_rdp_tls_ctrl(BIO* bio, int cmd, long num, void* ptr)
 static int bio_rdp_tls_new(BIO* bio)
 {
 	BIO_RDP_TLS* tls;
-
 	BIO_set_flags(bio, BIO_FLAGS_SHOULD_RETRY);
 
 	if (!(tls = calloc(1, sizeof(BIO_RDP_TLS))))
 		return 0;
 
 	InitializeCriticalSectionAndSpinCount(&tls->lock, 4000);
-
 	BIO_set_data(bio, (void*) tls);
-
 	return 1;
 }
 
@@ -469,6 +465,7 @@ static int bio_rdp_tls_free(BIO* bio)
 			SSL_shutdown(tls->ssl);
 			SSL_free(tls->ssl);
 		}
+
 		BIO_set_init(bio, 0);
 		BIO_set_flags(bio, 0);
 	}
@@ -1016,12 +1013,12 @@ BOOL tls_send_alert(rdpTls* tls)
 	if (!tls->ssl)
 		return TRUE;
 
-/**
- * FIXME: The following code does not work on OpenSSL > 1.1.0 because the
- *        SSL struct is opaqe now
- */
-
+	/**
+	 * FIXME: The following code does not work on OpenSSL > 1.1.0 because the
+	 *        SSL struct is opaqe now
+	 */
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+
 	if (tls->alertDescription != TLS_ALERT_DESCRIPTION_CLOSE_NOTIFY)
 	{
 		/**
@@ -1035,7 +1032,6 @@ BOOL tls_send_alert(rdpTls* tls)
 		 */
 		SSL_SESSION* ssl_session = SSL_get_session(tls->ssl);
 		SSL_CTX* ssl_ctx = SSL_get_SSL_CTX(tls->ssl);
-
 		SSL_set_quiet_shutdown(tls->ssl, 1);
 
 		if ((tls->alertLevel == TLS_ALERT_LEVEL_FATAL) && (ssl_session))
@@ -1048,8 +1044,8 @@ BOOL tls_send_alert(rdpTls* tls)
 		if (tls->ssl->s3->wbuf.left == 0)
 			tls->ssl->method->ssl_dispatch_alert(tls->ssl);
 	}
-#endif
 
+#endif
 	return TRUE;
 }
 
