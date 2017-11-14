@@ -1161,6 +1161,18 @@ BYTE* freerdp_bitmap_compress_planar(BITMAP_PLANAR_CONTEXT* context,
 	{
 		if (!context->AllowRunLengthEncoding)
 			return NULL;
+
+		if (context->rlePlanes[0] == NULL)
+			return NULL;
+
+		if (context->rlePlanes[1] == NULL)
+			return NULL;
+
+		if (context->rlePlanes[2] == NULL)
+			return NULL;
+
+		if (context->rlePlanes[3] == NULL)
+			return NULL;
 	}
 
 	if (!dstData)
