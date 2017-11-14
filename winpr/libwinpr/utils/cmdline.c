@@ -52,16 +52,10 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 	int i, j;
 	int status;
 	int count;
-	int length;
-	int index;
-	BOOL match;
-	BOOL found;
-	BOOL argument;
-	BOOL escaped;
+	size_t length;
 	BOOL notescaped;
 	char* sigil;
-	int sigil_length;
-	int sigil_index;
+	size_t sigil_length;
 	char* keyword;
 	SSIZE_T keyword_length;
 	SSIZE_T keyword_index;
@@ -69,10 +63,6 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 	char* value;
 	int toggle;
 	status = 0;
-	match = FALSE;
-	found = FALSE;
-	argument = FALSE;
-	escaped = TRUE;
 	notescaped = FALSE;
 
 	if (!argv)
@@ -86,8 +76,8 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 
 	for (i = 1; i < argc; i++)
 	{
-		index = i;
-		escaped = TRUE;
+		BOOL found = FALSE;
+		BOOL escaped = TRUE;
 
 		if (preFilter)
 		{
@@ -106,10 +96,8 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 			}
 		}
 
-		sigil_index = 0;
-		sigil_length = 0;
-		sigil = (char*) &argv[i][sigil_index];
-		length = (int) strlen(argv[i]);
+		sigil = (char*) argv[i];
+		length = strlen(argv[i]);
 
 		if ((sigil[0] == '/') && (flags & COMMAND_LINE_SIGIL_SLASH))
 		{
@@ -162,7 +150,7 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 				return COMMAND_LINE_ERROR_NO_KEYWORD;
 			}
 
-			keyword_index = sigil_index + sigil_length;
+			keyword_index = sigil_length;
 			keyword = (char*) &argv[i][keyword_index];
 			toggle = -1;
 
@@ -206,11 +194,9 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 			if (!escaped)
 				continue;
 
-			found = FALSE;
-
 			for (j = 0; options[j].Name != NULL; j++)
 			{
-				match = FALSE;
+				BOOL match = FALSE;
 
 				if (strncmp(options[j].Name, keyword, keyword_length) == 0)
 				{
@@ -231,10 +217,11 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 					continue;
 
 				found = match;
-				options[j].Index = index;
+				options[j].Index = i;
 
 				if ((flags & COMMAND_LINE_SEPARATOR_SPACE) && ((i + 1) < argc))
 				{
+					BOOL argument;
 					int value_present = 1;
 
 					if (flags & COMMAND_LINE_SIGIL_DASH)
@@ -264,7 +251,6 @@ int CommandLineParseArgumentsA(int argc, LPCSTR* argv, COMMAND_LINE_ARGUMENT_A* 
 					if (value_present && argument)
 					{
 						i++;
-						length = (int) strlen(argv[i]);
 						value = (char*) argv[i];
 					}
 					else if (!value_present && (options[j].Flags & COMMAND_LINE_VALUE_OPTIONAL))
