@@ -59,7 +59,10 @@ static SECURITY_STATUS SEC_ENTRY credssp_InitializeSecurityContextA(PCredHandle 
 		credentials = (SSPI_CREDENTIALS*) sspi_SecureHandleGetLowerPointer(phCredential);
 
 		if (!credentials)
+		{
+			credssp_ContextFree(context);
 			return SEC_E_INVALID_HANDLE;
+		}
 
 		sspi_SecureHandleSetLowerPointer(phNewContext, context);
 		sspi_SecureHandleSetUpperPointer(phNewContext, (void*) CREDSSP_PACKAGE_NAME);
