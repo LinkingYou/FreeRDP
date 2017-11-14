@@ -1010,7 +1010,7 @@ static void ap_integer_decrement_le(BYTE* number, int size)
 
 SECURITY_STATUS nla_encrypt_public_key_echo(rdpNla* nla)
 {
-	SecBuffer Buffers[2];
+	SecBuffer Buffers[2] = { 0 };
 	SecBufferDesc Message;
 	SECURITY_STATUS status;
 	int public_key_length;
@@ -1064,8 +1064,8 @@ SECURITY_STATUS nla_decrypt_public_key_echo(rdpNla* nla)
 	int length;
 	BYTE* buffer;
 	ULONG pfQOP = 0;
-	BYTE* public_key1;
-	BYTE* public_key2;
+	BYTE* public_key1 = NULL;
+	BYTE* public_key2 = NULL;
 	int public_key_length = 0;
 	int signature_length;
 	SecBuffer Buffers[2] = { 0 };
@@ -1309,6 +1309,10 @@ static BOOL nla_read_ts_credentials(rdpNla* nla, PSecBuffer ts_credentials)
 	int length;
 	int ts_password_creds_length = 0;
 	BOOL ret;
+
+	if (!ts_credentials || !ts_credentials->pvBuffer)
+		return FALSE;
+
 	s = Stream_New(ts_credentials->pvBuffer, ts_credentials->cbBuffer);
 
 	if (!s)
@@ -1410,7 +1414,7 @@ static BOOL nla_encode_ts_credentials(rdpNla* nla)
 
 static SECURITY_STATUS nla_encrypt_ts_credentials(rdpNla* nla)
 {
-	SecBuffer Buffers[2];
+	SecBuffer Buffers[2] = { 0 };
 	SecBufferDesc Message;
 	SECURITY_STATUS status;
 
@@ -1464,7 +1468,7 @@ static SECURITY_STATUS nla_decrypt_ts_credentials(rdpNla* nla)
 	int length;
 	BYTE* buffer;
 	ULONG pfQOP;
-	SecBuffer Buffers[2];
+	SecBuffer Buffers[2] = { 0 };
 	SecBufferDesc Message;
 	SECURITY_STATUS status;
 
@@ -2022,6 +2026,13 @@ void nla_free(rdpNla* nla)
 		if (SecIsValidHandle(&nla->credentials))
 		{
 			status = nla->table->FreeCredentialsHandle(&nla->credentials);
+
+			if (status != SEC_E_OK)
+			{
+				WLog_WARN(TAG, "FreeCredentialsHandle status %s [0x%08"PRIX32"]",
+				          GetSecurityStatusString(status), status);
+			}
+
 			SecInvalidateHandle(&nla->credentials);
 		}
 
