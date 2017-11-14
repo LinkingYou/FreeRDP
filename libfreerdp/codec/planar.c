@@ -309,7 +309,7 @@ static INLINE BOOL planar_decompress_planes_raw(const BYTE* pSrcData[4],
 		for (y = beg; y != end; y += inc)
 		{
 			BYTE* pRGB = &pDstData[((nYDst + y) * nDstStep) + (nXDst * GetBytesPerPixel(
-			                           DstFormat))];
+			                                        DstFormat))];
 
 			if (!writeLine(&pRGB, DstFormat, nWidth, &pR, &pG, &pB, &pA))
 				return FALSE;
@@ -320,7 +320,7 @@ static INLINE BOOL planar_decompress_planes_raw(const BYTE* pSrcData[4],
 		for (y = beg; y != end; y += inc)
 		{
 			BYTE* pRGB = &pDstData[((nYDst + y) * nDstStep) + (nXDst * GetBytesPerPixel(
-			                           DstFormat))];
+			                                        DstFormat))];
 
 			if (!writeLine(&pRGB, DstFormat, nWidth, &pR, &pG, &pB, &pA))
 				return FALSE;
@@ -1153,6 +1153,12 @@ BYTE* freerdp_bitmap_compress_planar(BITMAP_PLANAR_CONTEXT* context,
 			//WLog_DBG(TAG, "R: [%"PRIu32"/%"PRIu32"] G: [%"PRIu32"/%"PRIu32"] B: [%"PRIu32"/%"PRIu32"]",
 			//		dstSizes[1], planeSize, dstSizes[2], planeSize, dstSizes[3], planeSize);
 		}
+	}
+
+	if (FormatHeader & PLANAR_FORMAT_HEADER_RLE)
+	{
+		if (!context->AllowRunLengthEncoding)
+			return NULL;
 	}
 
 	if (!dstData)
