@@ -37,22 +37,42 @@ set(${MODULE_PREFIX}_SRCS
 	shadow_capture.h
 	shadow_channels.c
 	shadow_channels.h
-	shadow_encomsp.c
-	shadow_encomsp.h
-	shadow_remdesk.c
-	shadow_remdesk.h
-	shadow_rdpsnd.c
-	shadow_rdpsnd.h
-	shadow_audin.c
-	shadow_audin.h
-	shadow_rdpgfx.c
-	shadow_rdpgfx.h
 	shadow_subsystem.c
 	shadow_subsystem.h
 	shadow_mcevent.c
 	shadow_mcevent.h
 	shadow_server.c
 	shadow.h)
+
+if (CHANNEL_ENCOMSP_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		shadow_encomsp.c
+		shadow_encomsp.h)
+endif()
+
+if (CHANNEL_REMDESK_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		shadow_remdesk.c
+		shadow_remdesk.h)
+endif()
+
+if (CHANNEL_RDPSND_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		shadow_rdpsnd.c
+		shadow_rdpsnd.h)
+endif()
+
+if (CHANNEL_AUDIN_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		shadow_audin.c
+		shadow_audin.h)
+endif()
+
+if (CHANNEL_RDPGFX_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		shadow_rdpgfx.c
+		shadow_rdpgfx.h)
+endif()
 
 # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
@@ -64,9 +84,9 @@ if (WIN32)
   set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${MODULE_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
   configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-    @ONLY)
+	${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY)
 
   set ( ${MODULE_PREFIX}_SRCS ${${MODULE_PREFIX}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 endif()
@@ -100,8 +120,8 @@ set_property(TARGET ${MODULE_NAME} PROPERTY FOLDER "Server/shadow")
 set(MODULE_NAME "freerdp-shadow-subsystem")
 set(MODULE_PREFIX "FREERDP_SERVER_SHADOW_SUBSYSTEM")
 
-set(${MODULE_PREFIX}_SRCS		
-	shadow_subsystem_builtin.c)		
+set(${MODULE_PREFIX}_SRCS
+	shadow_subsystem_builtin.c)
 
 if(WIN32)
 	set(WITH_SHADOW_WIN 1)
@@ -118,9 +138,9 @@ if (WIN32)
   set (RC_VERSION_FILE "${MODULE_NAME}${CMAKE_EXECUTABLE_SUFFIX}" )
 
   configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-    @ONLY)
+	${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY)
 
   set ( ${MODULE_PREFIX}_SRCS ${${MODULE_PREFIX}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 endif()
@@ -318,9 +338,9 @@ if (WIN32)
   set (RC_VERSION_FILE "${MODULE_NAME}${CMAKE_EXECUTABLE_SUFFIX}" )
 
   configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-    @ONLY)
+	${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY)
 
   set ( ${MODULE_PREFIX}_SRCS ${${MODULE_PREFIX}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 endif()

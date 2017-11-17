@@ -19,6 +19,9 @@
 #ifndef FREERDP_SERVER_SHADOW_RDPSND_H
 #define FREERDP_SERVER_SHADOW_RDPSND_H
 
+#if !defined(CHANNEL_RDPSND) || !defined(CHANNEL_RDPSND_SERVER)
+#error "CHANNEL_RDPSND or CHANNEL_RDPSND_SERVER not defined!"
+#endif
 #include <freerdp/server/shadow.h>
 
 #include <winpr/crt.h>

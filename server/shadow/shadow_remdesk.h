@@ -19,6 +19,10 @@
 #ifndef FREERDP_SERVER_SHADOW_REMDESK_H
 #define FREERDP_SERVER_SHADOW_REMDESK_H
 
+#if !defined(CHANNEL_REMDESK) || !defined(CHANNEL_REMDESK_SERVER)
+#error "CHANNEL_REMDESK or CHANNEL_REMDESK_SERVER not defined!"
+#endif
+
 #include <freerdp/server/shadow.h>
 
 #include <winpr/crt.h>

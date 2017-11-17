@@ -19,6 +19,9 @@
 #ifndef FREERDP_SERVER_SHADOW_ENCOMSP_H
 #define FREERDP_SERVER_SHADOW_ENCOMSP_H
 
+#if !defined(CHANNEL_ENCOMSP) || !defined(CHANNEL_ENCOMSP_SERVER)
+#error "CHANNEL_ENCOMSP or CHANNEL_ENCOMSP_SERVER not defined!"
+#endif
 #include <freerdp/server/shadow.h>
 
 #include <winpr/crt.h>

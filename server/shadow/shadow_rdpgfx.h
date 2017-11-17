@@ -18,7 +18,9 @@
 
 #ifndef FREERDP_SERVER_SHADOW_RDPGFX_H
 #define FREERDP_SERVER_SHADOW_RDPGFX_H
-
+#if !defined(CHANNEL_RDPGFX) || !defined(CHANNEL_RDPGFX_SERVER)
+#error "CHANNEL_RDPGFX or CHANNEL_RDPGFX_SERVER not defined!"
+#endif
 #include <freerdp/server/shadow.h>
 
 #include <winpr/crt.h>

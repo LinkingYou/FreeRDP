@@ -24,12 +24,6 @@
 #include <winpr/crt.h>
 #include <winpr/synch.h>
 
-#include "shadow_encomsp.h"
-#include "shadow_remdesk.h"
-#include "shadow_rdpsnd.h"
-#include "shadow_audin.h"
-#include "shadow_rdpgfx.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -19,6 +19,9 @@
 #ifndef FREERDP_SERVER_SHADOW_AUDIN_H
 #define FREERDP_SERVER_SHADOW_AUDIN_H
 
+#if !defined(CHANNEL_AUDIN) || !defined(CHANNEL_AUDIN_SERVER)
+#error "CHANNEL_AUDIN or CHANNEL_AUDIN_SERVER not defined!"
+#endif
 #include <freerdp/server/shadow.h>
 
 #include <winpr/crt.h>
