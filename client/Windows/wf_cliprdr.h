@@ -19,6 +19,10 @@
 #ifndef FREERDP_CLIENT_WIN_CLIPRDR_H
 #define FREERDP_CLIENT_WIN_CLIPRDR_H
 
+#if !defined(CHANNEL_CLIPRDR)
+#error "CHANNEL_CLIPRDR not defined!"
+#endif
+
 #include "wf_client.h"
 
 BOOL wf_cliprdr_init(wfContext* wfc, CliprdrClientContext* cliprdr);

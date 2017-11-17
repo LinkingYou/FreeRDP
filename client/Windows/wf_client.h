@@ -34,7 +34,6 @@
 #include <freerdp/cache/cache.h>
 #include <freerdp/codec/color.h>
 
-#include <freerdp/client/rail.h>
 #include <freerdp/channels/channels.h>
 #include <freerdp/codec/rfx.h>
 #include <freerdp/codec/nsc.h>
@@ -45,7 +44,14 @@ typedef struct wf_context wfContext;
 #include "wf_channels.h"
 #include "wf_floatbar.h"
 #include "wf_event.h"
+
+#if defined(CHANNEL_RAIL)
+#include <freerdp/client/rail.h>
+#endif
+
+#if defined(CHANNEL_CLIPRDR)
 #include "wf_cliprdr.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,12 +131,15 @@ struct wf_context
 	int yCurrentScroll;
 	int yMaxScroll;
 
+#if defined(CHANNEL_CLIPRDR)
 	void* clipboard;
 	CliprdrClientContext* cliprdr;
+#endif
 
 	FloatBar* floatbar;
-
+#if defined(CHANNEL_RAIL)
 	RailClientContext* rail;
+#endif
 	wHashTable* railWindows;
 };
 

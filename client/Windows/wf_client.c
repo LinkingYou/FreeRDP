@@ -47,10 +47,14 @@
 #include <freerdp/channels/channels.h>
 
 #include "wf_gdi.h"
+#if defined(CHANNEL_RAIL)
 #include "wf_rail.h"
+#endif
 #include "wf_channels.h"
 #include "wf_graphics.h"
+#if defined(CHANNEL_CLIPRDR)
 #include "wf_cliprdr.h"
+#endif
 
 #include "wf_client.h"
 
@@ -106,9 +110,10 @@ static BOOL wf_end_paint(rdpContext* context)
 		updateRect.right = extents->right;
 		updateRect.bottom = extents->bottom;
 		InvalidateRect(wfc->hwnd, &updateRect, FALSE);
-
+#if defined(CHANNEL_RAIL)
 		if (wfc->rail)
 			wf_rail_invalidate_region(wfc, &invalidRegion);
+#endif
 	}
 
 	region16_uninit(&invalidRegion);

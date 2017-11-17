@@ -22,41 +22,58 @@
 
 #include "wf_channels.h"
 
-#include "wf_rail.h"
-#include "wf_cliprdr.h"
-
 #include <freerdp/gdi/gfx.h>
 
 #include <freerdp/log.h>
 #define TAG CLIENT_TAG("windows")
 
+#if defined(CHANNEL_RDPEI)
+#include <freerdp/client/rdpei.h>
+#endif
+#if defined(CHANNEL_RDPGFX)
+#include <freerdp/client/rdpgfx.h>
+#endif
+#if defined(CHANNEL_RAIL)
+#include "wf_rail.h"
+#endif
+#if defined(CHANNEL_CLIPRDR)
+#include "wf_cliprdr.h"
+#endif
+#if defined(CHANNEL_ENCOMSP)
+#include <freerdp/client/encomsp.h>
+#endif
 void wf_OnChannelConnectedEventHandler(rdpContext* context,
                                        ChannelConnectedEventArgs* e)
 {
 	wfContext* wfc = (wfContext*) context;
 	rdpSettings* settings = context->settings;
-
+#if defined(CHANNEL_RDPEI)
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
 	}
-	else if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_RDPGFX)
+	if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
 	{
 		if (!settings->SoftwareGdi)
 			WLog_WARN(TAG, "Channel "RDPGFX_DVC_CHANNEL_NAME" does not support hardware acceleration, using fallback.");
 
 		gdi_graphics_pipeline_init(context->gdi, (RdpgfxClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, RAIL_SVC_CHANNEL_NAME) == 0)
-	{
+#endif
+#if defined(CHANNEL_RAIL)
+	if (strcmp(e->name, RAIL_SVC_CHANNEL_NAME) == 0)
 		wf_rail_init(wfc, (RailClientContext*) e->pInterface);
-	}
-	else if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
-	{
+#endif
+#if defined(CHANNEL_CLIPRDR)
+	if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
 		wf_cliprdr_init(wfc, (CliprdrClientContext*) e->pInterface);
-	}
-	else if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_ENCOMSP)
+	if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
 	{
 	}
+#endif
 }
 
 void wf_OnChannelDisconnectedEventHandler(rdpContext* context,
@@ -65,23 +82,29 @@ void wf_OnChannelDisconnectedEventHandler(rdpContext* context,
 	wfContext* wfc = (wfContext*) context;
 	rdpSettings* settings = context->settings;
 
+#if defined(CHANNEL_RDPEI)
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
 	}
-	else if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_RDPGFX)
+	if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
 	{
 		gdi_graphics_pipeline_uninit(context->gdi,
-			(RdpgfxClientContext*) e->pInterface);
+		    (RdpgfxClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, RAIL_SVC_CHANNEL_NAME) == 0)
-	{
+#endif
+#if defined(CHANNEL_RAIL)
+	if (strcmp(e->name, RAIL_SVC_CHANNEL_NAME) == 0)
 		wf_rail_uninit(wfc, (RailClientContext*) e->pInterface);
-	}
-	else if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
-	{
+#endif
+#if defined(CHANNEL_CLIPRDR)
+	if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
 		wf_cliprdr_uninit(wfc, (CliprdrClientContext*) e->pInterface);
-	}
-	else if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_ENCOMSP)
+	if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
 	{
 	}
+#endif
 }

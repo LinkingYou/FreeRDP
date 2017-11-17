@@ -19,6 +19,9 @@
 #ifndef FREERDP_CLIENT_WIN_RAIL_H
 #define FREERDP_CLIENT_WIN_RAIL_H
 
+#if !defined(CHANNEL_RAIL)
+#error "CHANNEL_RAIL not defined!"
+#endif
 typedef struct wf_rail_window wfRailWindow;
 
 #include "wf_client.h"

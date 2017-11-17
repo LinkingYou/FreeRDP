@@ -27,16 +27,24 @@ set(${MODULE_PREFIX}_SRCS
 	wf_channels.h
 	wf_graphics.c
 	wf_graphics.h
-	wf_cliprdr.c
-	wf_cliprdr.h
-	wf_rail.c
-	wf_rail.h
 	wf_client.c
 	wf_client.h
 	wf_floatbar.c
 	wf_floatbar.h
 	wfreerdp.rc
 	resource.h)
+
+if (CHANNEL_RAIL)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		wf_rail.c
+		wf_rail.h)
+endif()
+
+if (CHANNEL_CLIPRDR)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		wf_cliprdr.c
+		wf_cliprdr.h)
+endif()
 
 # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
