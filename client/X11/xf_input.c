@@ -536,7 +536,7 @@ static void xf_input_show_cursor(xfContext* xfc)
 	xf_unlock_x11(xfc, FALSE);
 #endif
 }
-
+#if defined(CHANNEL_RDPEI)
 static int xf_input_touch_remote(xfContext* xfc, XIDeviceEvent* event, int evtype)
 {
 	int x, y;
@@ -571,6 +571,7 @@ static int xf_input_touch_remote(xfContext* xfc, XIDeviceEvent* event, int evtyp
 
 	return 0;
 }
+#endif
 
 static int xf_input_event(xfContext* xfc, XIDeviceEvent* event, int evtype)
 {
@@ -606,6 +607,8 @@ static int xf_input_handle_event_remote(xfContext* xfc, XEvent* event)
 	{
 		switch (cookie->evtype)
 		{
+#if defined(CHANNEL_RDPEI)
+
 			case XI_TouchBegin:
 				xf_input_touch_remote(xfc, cookie->data, XI_TouchBegin);
 				break;
@@ -617,6 +620,7 @@ static int xf_input_handle_event_remote(xfContext* xfc, XEvent* event)
 			case XI_TouchEnd:
 				xf_input_touch_remote(xfc, cookie->data, XI_TouchEnd);
 				break;
+#endif
 
 			default:
 				xf_input_event(xfc, cookie->data, cookie->evtype);

@@ -22,6 +22,9 @@
 #ifndef FREERDP_CLIENT_X11_GFX_H
 #define FREERDP_CLIENT_X11_GFX_H
 
+#if !defined(CHANNEL_RDPGFX)
+#error "CHANNEL_RDPGFX not defined"
+#endif
 #include "xf_client.h"
 #include "xfreerdp.h"
 

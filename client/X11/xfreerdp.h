@@ -171,10 +171,13 @@ struct xf_context
 	BOOL complex_regions;
 	VIRTUAL_SCREEN vscreen;
 	void* xv_context;
+#if defined(CHANNEL_TSMF)
 	TsmfClientContext* tsmf;
+#endif
+#if defined(CHANNEL_CLIPRDR)
 	xfClipboard* clipboard;
 	CliprdrClientContext* cliprdr;
-
+#endif
 	Atom UTF8_STRING;
 
 	Atom _NET_WM_ICON;
@@ -209,11 +212,18 @@ struct xf_context
 	Atom WM_DELETE_WINDOW;
 
 	/* Channels */
+#if defined(CHANNEL_RDPEI)
 	RdpeiClientContext* rdpei;
+#endif
+#if defined(CHANNEL_RDPGFX)
 	RdpgfxClientContext* gfx;
+#endif
+#if defined(CHANNEL_ENCOMSP)
 	EncomspClientContext* encomsp;
-
+#endif
+#if defined(CHANNEL_RAIL)
 	RailClientContext* rail;
+#endif
 	wHashTable* railWindows;
 
 	BOOL xkbAvailable;
@@ -225,10 +235,6 @@ struct xf_context
 
 BOOL xf_create_window(xfContext* xfc);
 void xf_toggle_fullscreen(xfContext* xfc);
-void xf_toggle_control(xfContext* xfc);
-
-void xf_encomsp_init(xfContext* xfc, EncomspClientContext* encomsp);
-void xf_encomsp_uninit(xfContext* xfc, EncomspClientContext* encomsp);
 
 enum XF_EXIT_CODE
 {

@@ -20,6 +20,10 @@
 #ifndef FREERDP_CLIENT_X11_RAIL_H
 #define FREERDP_CLIENT_X11_RAIL_H
 
+#if !defined(CHANNEL_RAIL)
+#error "CHANNEL_RAIL not defined"
+#endif
+
 #include "xf_client.h"
 #include "xfreerdp.h"
 

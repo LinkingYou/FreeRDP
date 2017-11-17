@@ -1,8 +1,8 @@
 /**
  * FreeRDP: A Remote Desktop Protocol Implementation
- * X11 Video Redirection
+ * X11 ENCOMSP
  *
- * Copyright 2010-2011 Vic Lee
+ * Copyright 2011 Marc-Andre Moreau <marcandre.moreau@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
  * limitations under the License.
  */
 
-#ifndef FREERDP_CLIENT_X11_TSMF_H
-#define FREERDP_CLIENT_X11_TSMF_H
+#ifndef FREERDP_CLIENT_X11_ENCOMSP_H
+#define FREERDP_CLIENT_X11_ENCOMSP_H
 
-#if !defined(CHANNEL_TSMF)
-#error "CHANNEL_TSMF not defined"
+#if !defined(CHANNEL_ENCOMSP)
+#error "CHANNEL_ENCOMSP not defined"
 #endif
+
+void xf_encomsp_init(xfContext* xfc, EncomspClientContext* encomsp);
+void xf_encomsp_toggle_control(xfContext* xfc);
+void xf_encomsp_uninit(xfContext* xfc, EncomspClientContext* encomsp);
 
 #include "xf_client.h"
 #include "xfreerdp.h"
 
-#include <freerdp/client/tsmf.h>
 
-int xf_tsmf_init(xfContext* xfc, TsmfClientContext* tsmf);
-int xf_tsmf_uninit(xfContext* xfc, TsmfClientContext* tsmf);
-
-#endif /* FREERDP_CLIENT_X11_TSMF_H */
+#endif /* FREERDP_CLIENT_X11_ENCOMSP_H */

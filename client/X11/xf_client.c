@@ -89,11 +89,17 @@
 #include <X11/XKBlib.h>
 
 #include "xf_gdi.h"
+#if defined(CHANNEL_RAIL)
 #include "xf_rail.h"
+#endif
+#if defined(CHANNEL_TSMF)
 #include "xf_tsmf.h"
+#endif
 #include "xf_event.h"
 #include "xf_input.h"
+#if defined(CHANNEL_CLIPRDR)
 #include "xf_cliprdr.h"
+#endif
 #include "xf_monitor.h"
 #include "xf_graphics.h"
 #include "xf_keyboard.h"
@@ -349,9 +355,11 @@ static BOOL xf_sw_end_paint(rdpContext* context)
 		if (gdi->primary->hdc->hwnd->invalid->null)
 			return TRUE;
 
+#if defined(CHANNEL_RAIL)
 		xf_lock_x11(xfc, FALSE);
 		xf_rail_paint(xfc, x, y, x + w, y + h);
 		xf_unlock_x11(xfc, FALSE);
+#endif
 	}
 
 	return TRUE;
@@ -446,6 +454,8 @@ static BOOL xf_hw_end_paint(rdpContext* context)
 	}
 	else
 	{
+#if defined(CHANNEL_RAIL)
+
 		if (xfc->hdc->hwnd->invalid->null)
 			return TRUE;
 
@@ -456,6 +466,7 @@ static BOOL xf_hw_end_paint(rdpContext* context)
 		xf_lock_x11(xfc, FALSE);
 		xf_rail_paint(xfc, x, y, x + w, y + h);
 		xf_unlock_x11(xfc, FALSE);
+#endif
 	}
 
 	return TRUE;
@@ -657,12 +668,6 @@ static void xf_window_free(xfContext* xfc)
 		xfc->hdc = NULL;
 	}
 
-	if (xfc->xv_context)
-	{
-		xf_tsmf_uninit(xfc, NULL);
-		xfc->xv_context = NULL;
-	}
-
 	if (xfc->image)
 	{
 		xfc->image->data = NULL;
@@ -706,48 +711,6 @@ void xf_toggle_fullscreen(xfContext* xfc)
 	EventArgsInit(&e, "xfreerdp");
 	e.state = xfc->fullscreen ? FREERDP_WINDOW_STATE_FULLSCREEN : 0;
 	PubSub_OnWindowStateChange(context->pubSub, context, &e);
-}
-
-void xf_toggle_control(xfContext* xfc)
-{
-	EncomspClientContext* encomsp;
-	ENCOMSP_CHANGE_PARTICIPANT_CONTROL_LEVEL_PDU pdu;
-	encomsp = xfc->encomsp;
-
-	if (!encomsp)
-		return;
-
-	pdu.ParticipantId = 0;
-	pdu.Flags = ENCOMSP_REQUEST_VIEW;
-
-	if (!xfc->controlToggle)
-		pdu.Flags |= ENCOMSP_REQUEST_INTERACT;
-
-	encomsp->ChangeParticipantControlLevel(encomsp, &pdu);
-	xfc->controlToggle = !xfc->controlToggle;
-}
-
-/**
- * Function description
- *
- * @return 0 on success, otherwise a Win32 error code
- */
-static UINT xf_encomsp_participant_created(EncomspClientContext* context,
-        ENCOMSP_PARTICIPANT_CREATED_PDU* participantCreated)
-{
-	return CHANNEL_RC_OK;
-}
-
-void xf_encomsp_init(xfContext* xfc, EncomspClientContext* encomsp)
-{
-	xfc->encomsp = encomsp;
-	encomsp->custom = (void*) xfc;
-	encomsp->ParticipantCreated = xf_encomsp_participant_created;
-}
-
-void xf_encomsp_uninit(xfContext* xfc, EncomspClientContext* encomsp)
-{
-	xfc->encomsp = NULL;
 }
 
 void xf_lock_x11(xfContext* xfc, BOOL display)
@@ -1265,10 +1228,12 @@ static BOOL xf_post_connect(freerdp* instance)
 	update->PlaySound = xf_play_sound;
 	update->SetKeyboardIndicators = xf_keyboard_set_indicators;
 	update->SetKeyboardImeStatus = xf_keyboard_set_ime_status;
+#if defined(CHANNEL_CLIPRDR)
 
 	if (!(xfc->clipboard = xf_clipboard_new(xfc)))
 		return FALSE;
 
+#endif
 	EventArgsInit(&e, "xfreerdp");
 	e.width = settings->DesktopWidth;
 	e.height = settings->DesktopHeight;
@@ -1287,6 +1252,7 @@ static void xf_post_disconnect(freerdp* instance)
 	context = instance->context;
 	xfc = (xfContext*) context;
 	gdi_free(instance);
+#if defined(CHANNEL_CLIPRDR)
 
 	if (xfc->clipboard)
 	{
@@ -1294,6 +1260,7 @@ static void xf_post_disconnect(freerdp* instance)
 		xfc->clipboard = NULL;
 	}
 
+#endif
 	xf_window_free(xfc);
 	xf_keyboard_free(xfc);
 }
@@ -1304,7 +1271,9 @@ static int xf_logon_error_info(freerdp* instance, UINT32 data, UINT32 type)
 	const char* str_data = freerdp_get_logon_error_info_data(data);
 	const char* str_type = freerdp_get_logon_error_info_type(type);
 	WLog_INFO(TAG, "Logon Error Info %s [%s]", str_data, str_type);
+#if defined(CHANNEL_RAIL)
 	xf_rail_disable_remoteapp_mode(xfc);
+#endif
 	return 1;
 }
 

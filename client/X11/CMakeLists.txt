@@ -26,12 +26,6 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 set(${MODULE_PREFIX}_SRCS
 	xf_gdi.c
 	xf_gdi.h
-	xf_gfx.c
-	xf_gfx.h
-	xf_rail.c
-	xf_rail.h
-	xf_tsmf.c
-	xf_tsmf.h
 	xf_input.c
 	xf_input.h
 	xf_event.c
@@ -40,8 +34,6 @@ set(${MODULE_PREFIX}_SRCS
 	xf_input.h
 	xf_channels.c
 	xf_channels.h
-	xf_cliprdr.c
-	xf_cliprdr.h
 	xf_monitor.c
 	xf_monitor.h
 	xf_graphics.c
@@ -53,6 +45,30 @@ set(${MODULE_PREFIX}_SRCS
 	xf_client.c
 	xf_client.h)
 
+if (CHANNEL_RDPGFX)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		xf_gfx.c
+		xf_gfx.h)
+endif()
+
+if (CHANNEL_RAIL)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		xf_rail.c
+		xf_rail.h)
+endif()
+
+if (CHANNEL_TSMF)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		xf_tsmf.c
+		xf_tsmf.h)
+endif()
+
+if (CHANNEL_CLIPRDR)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		xf_cliprdr.c
+		xf_cliprdr.h)
+endif()
+
 if(WITH_CLIENT_INTERFACE)
 	if(CLIENT_INTERFACE_SHARED)
 		add_library(${MODULE_NAME} SHARED ${${MODULE_PREFIX}_SRCS})
@@ -62,7 +78,7 @@ if(WITH_CLIENT_INTERFACE)
 	else()
 		add_library(${MODULE_NAME} ${${MODULE_PREFIX}_SRCS})
 	endif()
-  
+
 else()
 	set(${MODULE_PREFIX}_SRCS ${${MODULE_PREFIX}_SRCS} cli/xfreerdp.c xfreerdp.h)
 	add_executable(${MODULE_NAME} ${${MODULE_PREFIX}_SRCS})
@@ -87,24 +103,24 @@ if(WITH_MANPAGES)
 		configure_file(xfreerdp.1.xml.in xfreerdp.1.xml @ONLY IMMEDIATE)
 
 		add_executable(generate_argument_docbook generate_argument_docbook.c)
-	
+
 		set(GAD_LIBS freerdp-client)
 		target_link_libraries(generate_argument_docbook ${GAD_LIBS} freerdp winpr)
 
 		add_custom_command(OUTPUT xfreerdp.1
-					COMMAND generate_argument_docbook
+			        COMMAND generate_argument_docbook
 					COMMAND ${CMAKE_COMMAND} -E copy
-						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-channels.1.xml ${CMAKE_CURRENT_BINARY_DIR}
+					    ${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-channels.1.xml ${CMAKE_CURRENT_BINARY_DIR}
 					COMMAND ${CMAKE_COMMAND} -E copy
-						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-examples.1.xml ${CMAKE_CURRENT_BINARY_DIR}
+					    ${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-examples.1.xml ${CMAKE_CURRENT_BINARY_DIR}
 					COMMAND ${CMAKE_COMMAND} -E copy
-						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-envvar.1.xml ${CMAKE_CURRENT_BINARY_DIR}
+					    ${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-envvar.1.xml ${CMAKE_CURRENT_BINARY_DIR}
 					COMMAND ${XSLTPROC_EXECUTABLE} ${DOCBOOKXSL_DIR}/manpages/docbook.xsl xfreerdp.1.xml
 					WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-					DEPENDS 
-						${CMAKE_CURRENT_BINARY_DIR}/xfreerdp.1.xml 
-						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-examples.1.xml 
-						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-channels.1.xml 
+					DEPENDS
+					    ${CMAKE_CURRENT_BINARY_DIR}/xfreerdp.1.xml
+						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-examples.1.xml
+						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-channels.1.xml
 						${CMAKE_CURRENT_SOURCE_DIR}/xfreerdp-envvar.1.xml
 						generate_argument_docbook)
 
@@ -139,11 +155,11 @@ set(XV_FEATURE_DESCRIPTION "X11 video extension")
 
 set(XI_FEATURE_TYPE "RECOMMENDED")
 set(XI_FEATURE_PURPOSE "input")
-set(XI_FEATURE_DESCRIPTION "X11 input extension") 
+set(XI_FEATURE_DESCRIPTION "X11 input extension")
 
 set(XRENDER_FEATURE_TYPE "RECOMMENDED")
 set(XRENDER_FEATURE_PURPOSE "rendering")
-set(XRENDER_FEATURE_DESCRIPTION "X11 render extension") 
+set(XRENDER_FEATURE_DESCRIPTION "X11 render extension")
 
 set(XFIXES_FEATURE_TYPE "RECOMMENDED")
 set(XFIXES_FEATURE_PURPOSE "X11 xfixes extension")
@@ -209,7 +225,7 @@ endif()
 target_link_libraries(${MODULE_NAME} ${PRIVATE_KEYWORD} ${${MODULE_PREFIX}_LIBS})
 
 if(WITH_IPP)
-    target_link_libraries(${MODULE_NAME} ${PRIVATE_KEYWORD} ${IPP_LIBRARY_LIST})
+	target_link_libraries(${MODULE_NAME} ${PRIVATE_KEYWORD} ${IPP_LIBRARY_LIST})
 endif()
 
 if(WITH_CLIENT_INTERFACE)

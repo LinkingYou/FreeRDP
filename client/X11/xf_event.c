@@ -27,11 +27,17 @@
 #include <freerdp/log.h>
 #include <freerdp/locale/keyboard.h>
 
+#if defined(CHANNEL_RAIL)
 #include "xf_rail.h"
+#endif
 #include "xf_window.h"
+#if defined(CHANNEL_CLIPRDR)
 #include "xf_cliprdr.h"
+#endif
 #include "xf_input.h"
+#if defined(CHANNEL_RDPEI)
 #include "xf_gfx.h"
+#endif
 
 #include "xf_event.h"
 #include "xf_input.h"
@@ -227,11 +233,15 @@ static BOOL xf_event_Expose(xfContext* xfc, XEvent* event, BOOL app)
 		h = event->xexpose.height;
 	}
 
+#if defined(CHANNEL_RDPGFX)
+
 	if (xfc->gfx)
 	{
 		xf_OutputExpose(xfc, x, y, w, h);
 		return TRUE;
 	}
+
+#endif
 
 	if (!app)
 	{
@@ -491,7 +501,6 @@ static BOOL xf_event_KeyRelease(xfContext* xfc, XEvent* event, BOOL app)
 	XEvent nextEvent;
 	KeySym keysym;
 	char str[256];
-
 	XLookupString((XKeyEvent*) event, str, sizeof(str), &keysym, NULL);
 	xf_keyboard_key_release(xfc, event->xkey.keycode, keysym);
 	return TRUE;
@@ -511,13 +520,17 @@ static BOOL xf_event_FocusIn(xfContext* xfc, XEvent* event, BOOL app)
 	if (app)
 	{
 		xfAppWindow* appWindow;
+#if defined(CHANNEL_RAIL)
 		xf_rail_send_activate(xfc, event->xany.window, TRUE);
+#endif
 		appWindow = xf_AppWindowFromX11Window(xfc, event->xany.window);
 
 		/* Update the server with any window changes that occurred while the window was not focused. */
 		if (appWindow)
 		{
+#if defined(CHANNEL_RAIL)
 			xf_rail_adjust_position(xfc, appWindow);
+#endif
 		}
 	}
 
@@ -539,7 +552,11 @@ static BOOL xf_event_FocusOut(xfContext* xfc, XEvent* event, BOOL app)
 	xf_keyboard_clear(xfc);
 
 	if (app)
+	{
+#if defined(CHANNEL_RAIL)
 		xf_rail_send_activate(xfc, event->xany.window, FALSE);
+#endif
+	}
 
 	return TRUE;
 }
@@ -569,7 +586,9 @@ static BOOL xf_event_ClientMessage(xfContext* xfc, XEvent* event, BOOL app)
 
 			if (appWindow)
 			{
+#if defined(CHANNEL_RAIL)
 				xf_rail_send_client_system_command(xfc, appWindow->windowId, SC_CLOSE);
+#endif
 			}
 
 			return TRUE;
@@ -690,14 +709,20 @@ static BOOL xf_event_ConfigureNotify(xfContext* xfc, XEvent* event, BOOL app)
 		if (appWindow->decorations)
 		{
 			/* moving resizing using window decoration */
+#if defined(CHANNEL_RAIL)
 			xf_rail_adjust_position(xfc, appWindow);
+#endif
 		}
 		else
 		{
+#if defined(CHANNEL_RAIL)
+
 			if ((!event->xconfigure.send_event
 			     || appWindow->local_move.state == LMS_NOT_ACTIVE)
 			    && !appWindow->rail_ignore_configure && xfc->focused)
 				xf_rail_adjust_position(xfc, appWindow);
+
+#endif
 		}
 	}
 
@@ -833,6 +858,8 @@ static BOOL xf_event_PropertyNotify(xfContext* xfc, XEvent* event, BOOL app)
 				}
 			}
 
+#if defined(CHANNEL_RAIL)
+
 			if (maxVert && maxHorz && !minimized
 			    && (appWindow->rail_state != WINDOW_SHOW_MAXIMIZED))
 			{
@@ -850,6 +877,8 @@ static BOOL xf_event_PropertyNotify(xfContext* xfc, XEvent* event, BOOL app)
 				appWindow->rail_state = WINDOW_SHOW;
 				xf_rail_send_client_system_command(xfc, appWindow->windowId, SC_RESTORE);
 			}
+
+#endif
 		}
 	}
 
@@ -928,7 +957,9 @@ static BOOL xf_event_suppress_events(xfContext* xfc, xfAppWindow* appWindow,
 
 				default:
 					/* Any other event terminates move */
+#if defined(CHANNEL_RAIL)
 					xf_rail_end_local_move(xfc, appWindow);
+#endif
 					break;
 			}
 
@@ -1049,8 +1080,9 @@ BOOL xf_event_process(freerdp* instance, XEvent* event)
 			break;
 	}
 
+#if defined(CHANNEL_CLIPRDR)
 	xf_cliprdr_handle_xevent(xfc, event);
-
+#endif
 	xf_input_handle_event(xfc, event);
 	XSync(xfc->display, FALSE);
 	return status;

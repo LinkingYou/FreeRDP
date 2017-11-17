@@ -40,6 +40,10 @@
 
 #include "xf_keyboard.h"
 
+#if defined(CHANNEL_ENCOMSP)
+#include "xf_encomsp.h"
+#endif
+
 #include <freerdp/log.h>
 #define TAG CLIENT_TAG("x11")
 
@@ -489,7 +493,9 @@ BOOL xf_keyboard_handle_special_keys(xfContext* xfc, KeySym keysym)
 		if (mod.Ctrl && mod.Alt)
 		{
 			/* Ctrl-Alt-C: toggle control */
-			xf_toggle_control(xfc);
+#if defined(CHANNEL_ENCOMSP)
+			xf_encomsp_toggle_control(xfc);
+#endif
 			return TRUE;
 		}
 	}
@@ -593,7 +599,9 @@ void xf_keyboard_handle_special_keys_release(xfContext* xfc, KeySym keysym)
 	{
 		if (!xfc->fullscreen)
 		{
-			xf_toggle_control(xfc);
+#if defined(CHANNEL_ENCOMSP)
+			xf_encomsp_toggle_control(xfc);
+#endif
 		}
 
 		XUngrabKeyboard(xfc->display, CurrentTime);
@@ -614,13 +622,14 @@ BOOL xf_keyboard_set_indicators(rdpContext* context, UINT16 led_flags)
 	return TRUE;
 }
 
-BOOL xf_keyboard_set_ime_status(rdpContext* context, UINT16 imeId, UINT32 imeState, UINT32 imeConvMode)
+BOOL xf_keyboard_set_ime_status(rdpContext* context, UINT16 imeId, UINT32 imeState,
+                                UINT32 imeConvMode)
 {
 	if (!context)
 		return FALSE;
 
-	WLog_WARN(TAG, "KeyboardSetImeStatus(unitId=%04"PRIx16", imeState=%08"PRIx32", imeConvMode=%08"PRIx32") ignored",
+	WLog_WARN(TAG,
+	          "KeyboardSetImeStatus(unitId=%04"PRIx16", imeState=%08"PRIx32", imeConvMode=%08"PRIx32") ignored",
 	          imeId, imeState, imeConvMode);
-
 	return TRUE;
 }

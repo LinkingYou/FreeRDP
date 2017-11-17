@@ -20,6 +20,10 @@
 #ifndef FREERDP_CLIENT_X11_CLIPRDR_H
 #define FREERDP_CLIENT_X11_CLIPRDR_H
 
+#if !defined(CHANNEL_CLIPRDR)
+#error "CHANNEL_CLIPRDR not defined"
+#endif
+
 #include "xf_client.h"
 #include "xfreerdp.h"
 

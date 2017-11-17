@@ -40,7 +40,6 @@
 #include <winpr/crt.h>
 #include <winpr/string.h>
 
-#include <freerdp/rail.h>
 #include <freerdp/log.h>
 
 #ifdef WITH_XEXT
@@ -52,7 +51,6 @@
 #include "xf_input.h"
 #endif
 
-#include "xf_rail.h"
 #include "xf_input.h"
 
 #define TAG CLIENT_TAG("x11")
@@ -592,7 +590,7 @@ void xf_SetWindowText(xfContext* xfc, xfAppWindow* appWindow, const char* name)
 }
 
 static void xf_FixWindowCoordinates(xfContext* xfc, int* x, int* y, int* width,
-                             int* height)
+                                    int* height)
 {
 	int vscreen_width;
 	int vscreen_height;
