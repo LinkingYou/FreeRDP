@@ -32,32 +32,38 @@ macro(define_channel_options)
 	string(TOUPPER "CHANNEL_${CHANNEL_NAME}" CHANNEL_OPTION)
 	string(TOUPPER "CHANNEL_${CHANNEL_NAME}_CLIENT" CHANNEL_CLIENT_OPTION)
 	string(TOUPPER "CHANNEL_${CHANNEL_NAME}_SERVER" CHANNEL_SERVER_OPTION)
-	
+
 	if(${${CHANNEL_CLIENT_OPTION}})
 		set(OPTION_CLIENT_DEFAULT ${${CHANNEL_CLIENT_OPTION}})
 	endif()
-	
+
 	if(${${CHANNEL_SERVER_OPTION}})
 		set(OPTION_SERVER_DEFAULT ${${CHANNEL_SERVER_OPTION}})
 	endif()
-	
+
 	if(${${CHANNEL_OPTION}})
 		set(OPTION_DEFAULT ${${CHANNEL_OPTION}})
 	endif()
-	
+
 	if(${OPTION_CLIENT_DEFAULT} OR ${OPTION_SERVER_DEFAULT})
 		set(OPTION_DEFAULT "ON")
 	endif()
-	
+
 	set(CHANNEL_DEFAULT ${OPTION_DEFAULT})
-		
+
 	set(CHANNEL_OPTION_DOC "Build ${CHANNEL_NAME} ${CHANNEL_TYPE} channel")
 	option(${CHANNEL_OPTION} "${CHANNEL_OPTION_DOC}" ${CHANNEL_DEFAULT})
+
+	if (NOT ${CHANNEL_OPTION})
+		set(${CHANNEL_CLIENT_OPTION} OFF)
+		set(${CHANNEL_SERVER_OPTION} OFF)
+	endif()
 
 endmacro(define_channel_options)
 
 macro(define_channel_client_options _channel_client_default)
 	string(TOUPPER "CHANNEL_${CHANNEL_NAME}_CLIENT" CHANNEL_CLIENT_OPTION)
+	string(TOUPPER "CHANNEL_${CHANNEL_NAME}" CHANNEL_OPTION)
 	set(CHANNEL_CLIENT_OPTION_DOC "Build ${CHANNEL_NAME} ${CHANNEL_TYPE} channel client")
 	option(${CHANNEL_CLIENT_OPTION} "${CHANNEL_CLIENT_OPTION_DOC}" ${_channel_client_default})
 	cmake_dependent_option(${CHANNEL_CLIENT_OPTION} "${CHANNEL_CLIENT_OPTION_DOC}"
@@ -66,6 +72,7 @@ endmacro(define_channel_client_options)
 
 macro(define_channel_server_options _channel_server_default)
 	string(TOUPPER "CHANNEL_${CHANNEL_NAME}_SERVER" CHANNEL_SERVER_OPTION)
+	string(TOUPPER "CHANNEL_${CHANNEL_NAME}" CHANNEL_OPTION)
 	set(CHANNEL_SERVER_OPTION_DOC "Build ${CHANNEL_NAME} ${CHANNEL_TYPE} channel server")
 	option(${CHANNEL_SERVER_OPTION} "${CHANNEL_SERVER_OPTION_DOC}" ${_channel_server_default})
 	cmake_dependent_option(${CHANNEL_SERVER_OPTION} "${CHANNEL_SERVER_OPTION_DOC}"
@@ -155,7 +162,7 @@ macro(add_channel_client_subsystem _channel_prefix _channel_name _subsystem _typ
 endmacro(add_channel_client_subsystem)
 
 macro(channel_install _targets _destination _export_target)
-		install(TARGETS ${_targets} DESTINATION ${_destination} EXPORT ${_export_target})
+	    install(TARGETS ${_targets} DESTINATION ${_destination} EXPORT ${_export_target})
 endmacro(channel_install)
 
 macro(server_channel_install _targets _destination)
@@ -171,21 +178,21 @@ macro(add_channel_client_library _module_prefix _module_name _channel_name _dyna
 # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
     if (WIN32)
-      set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
-      set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
-      set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
-      set (RC_VERSION_PATCH 0)
-      set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+		set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
+	  set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
+	  set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
+	  set (RC_VERSION_PATCH 0)
+	  set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
-      configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-        @ONLY)
+	  configure_file(
+		${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+		${CMAKE_CURRENT_BINARY_DIR}/version.rc
+		@ONLY)
 
-      set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+	  set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
     endif()
 
-		add_library(${_module_name} ${${_module_prefix}_SRCS})
+	    add_library(${_module_name} ${${_module_prefix}_SRCS})
 		client_channel_install(${_module_name}  ${FREERDP_ADDIN_PATH})
 	else()
 		set(${_module_prefix}_STATIC ON PARENT_SCOPE)
@@ -204,21 +211,21 @@ macro(add_channel_client_subsystem_library _module_prefix _module_name _channel_
 # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
     if (WIN32)
-      set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
-      set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
-      set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
-      set (RC_VERSION_PATCH 0)
-      set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+		set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
+	  set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
+	  set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
+	  set (RC_VERSION_PATCH 0)
+	  set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
-      configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-        @ONLY)
+	  configure_file(
+		${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+		${CMAKE_CURRENT_BINARY_DIR}/version.rc
+		@ONLY)
 
-      set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+	  set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
     endif()
 
-		add_library(${_module_name} ${${_module_prefix}_SRCS})
+	    add_library(${_module_name} ${${_module_prefix}_SRCS})
 		client_channel_install(${_module_name}  ${FREERDP_ADDIN_PATH})
 	else()
 		set(${_module_prefix}_STATIC ON PARENT_SCOPE)
@@ -236,20 +243,20 @@ macro(add_channel_server_library _module_prefix _module_name _channel_name _dyna
 # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
     if (WIN32)
-      set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
-      set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
-      set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
-      set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+		set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
+	  set (RC_VERSION_MINOR ${FREERDP_VERSION_MINOR})
+	  set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
+	  set (RC_VERSION_FILE "${CMAKE_SHARED_LIBRARY_PREFIX}${_module_name}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
-      configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-        @ONLY)
+	  configure_file(
+		${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+		${CMAKE_CURRENT_BINARY_DIR}/version.rc
+		@ONLY)
 
-      set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+	  set ( ${_module_prefix}_SRCS ${${_module_prefix}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
     endif()
 
-		add_library(${_module_name} ${${_module_prefix}_SRCS})
+	    add_library(${_module_name} ${${_module_prefix}_SRCS})
 		server_channel_install(${_module_name}  ${FREERDP_ADDIN_PATH})
 	else()
 		set(${_module_prefix}_STATIC ON PARENT_SCOPE)
