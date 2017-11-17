@@ -57,7 +57,7 @@ struct mf_context
 
 	DWORD mainThreadId;
 	DWORD keyboardThreadId;
-
+#if defined(CHANNEL_CLIPRDR)
 	BOOL clipboardSync;
 	wClipboard* clipboard;
 	UINT32 numServerFormats;
@@ -66,6 +66,7 @@ struct mf_context
 	CLIPRDR_FORMAT* serverFormats;
 	CliprdrClientContext* cliprdr;
 	UINT32 clipboardCapabilities;
+#endif
 
 	rdpFile* connectionRdpFile;
 

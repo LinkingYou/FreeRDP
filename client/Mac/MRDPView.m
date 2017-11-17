@@ -17,13 +17,19 @@
  * limitations under the License.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <winpr/windows.h>
 
 #include "mf_client.h"
 #import "mfreerdp.h"
 #import "MRDPView.h"
 #import "MRDPCursor.h"
+#if defined(CHANNEL_CLIPRDR)
 #import "Clipboard.h"
+#endif
 #import "PasswordDialog.h"
 
 #include <winpr/crt.h>
@@ -737,6 +743,7 @@ DWORD fixKeyCode(DWORD keyCode, unichar keyChar, enum APPLE_KEYBOARD_TYPE type)
 
 - (void) onPasteboardTimerFired :(NSTimer*) timer
 {
+#if defined(CHANNEL_CLIPRDR)
 	BYTE* data;
 	UINT32 size;
 	UINT32 formatId;
@@ -785,6 +792,7 @@ DWORD fixKeyCode(DWORD keyCode, unichar keyChar, enum APPLE_KEYBOARD_TYPE type)
 
 	if (mfc->clipboardSync)
 		mac_cliprdr_send_client_format_list(mfc->cliprdr);
+#endif
 }
 
 - (void) pause
@@ -829,21 +837,27 @@ void mac_OnChannelConnectedEventHandler(rdpContext* context,
 	rdpSettings* settings = context->settings;
 	mfContext* mfc = (mfContext*) context;
 
+#if defined(CHANNEL_RDPEI)
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
 	}
-	else if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_RDPGFX)
+	if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
 	{
 		if (settings->SoftwareGdi)
 			gdi_graphics_pipeline_init(context->gdi, (RdpgfxClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_CLIPRDR)
+	if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
+		mac_cliprdr_init(mfc, (CliprdrClientContext*) e->pInterface);	
+#endif
+#if defined(CHANNEL_ENCOMSP)
+	if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
 	{
-		mac_cliprdr_init(mfc, (CliprdrClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
-	{
-	}
+#endif
 }
 
 void mac_OnChannelDisconnectedEventHandler(rdpContext* context,
@@ -852,22 +866,30 @@ void mac_OnChannelDisconnectedEventHandler(rdpContext* context,
 	rdpSettings* settings = context->settings;
 	mfContext* mfc = (mfContext*) context;
 
+#if defined(CHANNEL_RDPEI)
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
 	}
-	else if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_RDPGFX)
+	if (strcmp(e->name, RDPGFX_DVC_CHANNEL_NAME) == 0)
 	{
 		if (settings->SoftwareGdi)
 			gdi_graphics_pipeline_uninit(context->gdi,
 			                             (RdpgfxClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_CLIPRDR)
+	if (strcmp(e->name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
 	{
 		mac_cliprdr_uninit(mfc, (CliprdrClientContext*) e->pInterface);
 	}
-	else if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
+#endif
+#if defined(CHANNEL_ENCOMSP)
+	if (strcmp(e->name, ENCOMSP_SVC_CHANNEL_NAME) == 0)
 	{
 	}
+#endif
 }
 
 BOOL mac_pre_connect(freerdp* instance)

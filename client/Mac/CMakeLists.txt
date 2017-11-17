@@ -38,7 +38,6 @@ set(${MODULE_PREFIX}_OBJECTIVE_SOURCES
 	MRDPCursor.m
 	MRDPView.m
 	Keyboard.m
-	Clipboard.m
 	PasswordDialog.m)
 
 list(APPEND ${MODULE_PREFIX}_SOURCES ${${MODULE_PREFIX}_OBJECTIVE_SOURCES})
@@ -49,8 +48,15 @@ set(${MODULE_PREFIX}_HEADERS
 	MRDPCursor.h
 	MRDPView.h
 	Keyboard.h
-	Clipboard.h
+
 	PasswordDialog.h)
+
+if (CHANNEL_CLIPRDR)
+	list(APPEND ${MODULE_PREFIX}_HEADERS
+		Clipboard.h)
+	list(APPEND ${MODULE_PREFIX}_OBJECTIVE_SOURCES
+		Clipboard.m)
+endif()
 
 set(${MODULE_PREFIX}_RESOURCES "en.lproj/InfoPlist.strings")
 

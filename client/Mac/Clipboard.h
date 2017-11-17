@@ -25,6 +25,9 @@
 #import "freerdp/channels/channels.h"
 #import "freerdp/client/cliprdr.h"
 
+#if !defined(CHANNEL_CLIPRDR)
+#error "CHANNEL_CLIPRDR not defined!"
+#endif
 int mac_cliprdr_send_client_format_list(CliprdrClientContext* cliprdr);
 
 void mac_cliprdr_init(mfContext* mfc, CliprdrClientContext* cliprdr);
