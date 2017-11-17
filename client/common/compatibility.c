@@ -155,6 +155,7 @@ BOOL freerdp_client_old_parse_hostname(char* str, char** ServerHostname, UINT32*
 int freerdp_client_old_process_plugin(rdpSettings* settings, ADDIN_ARGV* args)
 {
 	int args_handled = 0;
+#if defined(CHANNEL_CLIPRDR)
 
 	if (strcmp(args->argv[0], "cliprdr") == 0)
 	{
@@ -162,72 +163,74 @@ int freerdp_client_old_process_plugin(rdpSettings* settings, ADDIN_ARGV* args)
 		settings->RedirectClipboard = TRUE;
 		WLog_WARN(TAG,  "--plugin cliprdr -> +clipboard");
 	}
-	else if (strcmp(args->argv[0], "rdpdr") == 0)
-	{
-		args_handled++;
-
-		if (args->argc < 2)
-			return 1;
-
-		args_handled++;
-
-		if ((strcmp(args->argv[1], "disk") == 0) ||
-		    (strcmp(args->argv[1], "drive") == 0))
-		{
-			freerdp_addin_replace_argument(args, "disk", "drive");
-			freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
-		}
-		else if (strcmp(args->argv[1], "printer") == 0)
-		{
-			freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
-		}
-		else if ((strcmp(args->argv[1], "scard") == 0) ||
-		         (strcmp(args->argv[1], "smartcard") == 0))
-		{
-			freerdp_addin_replace_argument(args, "scard", "smartcard");
-			freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
-		}
-		else if (strcmp(args->argv[1], "serial") == 0)
-		{
-			freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
-		}
-		else if (strcmp(args->argv[1], "parallel") == 0)
-		{
-			freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
-		}
-	}
-	else if (strcmp(args->argv[0], "drdynvc") == 0)
-	{
-		args_handled++;
-		freerdp_client_add_dynamic_channel(settings, args->argc - 1, &args->argv[1]);
-	}
-	else if (strcmp(args->argv[0], "rdpsnd") == 0)
-	{
-		args_handled++;
-
-		if (args->argc < 2)
-			return 1;
-
-		args_handled++;
-		freerdp_addin_replace_argument_value(args, args->argv[1], "sys", args->argv[1]);
-		freerdp_client_add_static_channel(settings, args->argc, args->argv);
-	}
-	else if (strcmp(args->argv[0], "rail") == 0)
-	{
-		args_handled++;
-
-		if (args->argc < 2)
-			return 1;
-
-		args_handled++;
-
-		if (!(settings->RemoteApplicationProgram = _strdup(args->argv[1])))
-			return -1;
-	}
 	else
-	{
-		freerdp_client_add_static_channel(settings, args->argc, args->argv);
-	}
+#endif
+		if (strcmp(args->argv[0], "rdpdr") == 0)
+		{
+			args_handled++;
+
+			if (args->argc < 2)
+				return 1;
+
+			args_handled++;
+
+			if ((strcmp(args->argv[1], "disk") == 0) ||
+			    (strcmp(args->argv[1], "drive") == 0))
+			{
+				freerdp_addin_replace_argument(args, "disk", "drive");
+				freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
+			}
+			else if (strcmp(args->argv[1], "printer") == 0)
+			{
+				freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
+			}
+			else if ((strcmp(args->argv[1], "scard") == 0) ||
+			         (strcmp(args->argv[1], "smartcard") == 0))
+			{
+				freerdp_addin_replace_argument(args, "scard", "smartcard");
+				freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
+			}
+			else if (strcmp(args->argv[1], "serial") == 0)
+			{
+				freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
+			}
+			else if (strcmp(args->argv[1], "parallel") == 0)
+			{
+				freerdp_client_add_device_channel(settings, args->argc - 1, &args->argv[1]);
+			}
+		}
+		else if (strcmp(args->argv[0], "drdynvc") == 0)
+		{
+			args_handled++;
+			freerdp_client_add_dynamic_channel(settings, args->argc - 1, &args->argv[1]);
+		}
+		else if (strcmp(args->argv[0], "rdpsnd") == 0)
+		{
+			args_handled++;
+
+			if (args->argc < 2)
+				return 1;
+
+			args_handled++;
+			freerdp_addin_replace_argument_value(args, args->argv[1], "sys", args->argv[1]);
+			freerdp_client_add_static_channel(settings, args->argc, args->argv);
+		}
+		else if (strcmp(args->argv[0], "rail") == 0)
+		{
+			args_handled++;
+
+			if (args->argc < 2)
+				return 1;
+
+			args_handled++;
+
+			if (!(settings->RemoteApplicationProgram = _strdup(args->argv[1])))
+				return -1;
+		}
+		else
+		{
+			freerdp_client_add_static_channel(settings, args->argc, args->argv);
+		}
 
 	return args_handled;
 }

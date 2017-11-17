@@ -20,13 +20,17 @@
 #ifndef FREERDP_SERVER_SAMPLE_SF_AUDIN_H
 #define FREERDP_SERVER_SAMPLE_SF_AUDIN_H
 
-#include <freerdp/freerdp.h>
-#include <freerdp/listener.h>
-#include <freerdp/server/audin.h>
+#if !defined(CHANNEL_AUDIN) || !defined(CHANNEL_AUDIN_SERVER)
+#error "CHANNEL_AUDIN or CHANNEL_AUDIN_SERVER not defined!"
+#endif
+
+#include <winpr/wtypes.h>
 
 #include "sfreerdp.h"
 
-void sf_peer_audin_init(testPeerContext* context);
+BOOL sf_peer_audin_init(testPeerContext* context);
+BOOL sf_peer_audin_toggle(testPeerContext* context);
+void sf_peer_audin_uninit(testPeerContext* context);
 
 #endif /* FREERDP_SERVER_SAMPLE_SF_AUDIN_H */
 

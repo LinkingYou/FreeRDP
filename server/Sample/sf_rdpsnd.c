@@ -44,25 +44,38 @@ static void sf_peer_rdpsnd_activated(RdpsndServerContext* context)
 
 BOOL sf_peer_rdpsnd_init(testPeerContext* context)
 {
-	context->rdpsnd = rdpsnd_server_context_new(context->vcm);
-	context->rdpsnd->rdpcontext = &context->_p;
-	context->rdpsnd->data = context;
+#if defined(CHANNEL_RDPSND_SERVER)
 
-	context->rdpsnd->server_formats = test_audio_formats;
-	context->rdpsnd->num_server_formats =
-			sizeof(test_audio_formats) / sizeof(test_audio_formats[0]);
-
-	context->rdpsnd->src_format.wFormatTag = 1;
-	context->rdpsnd->src_format.nChannels = 2;
-	context->rdpsnd->src_format.nSamplesPerSec = 44100;
-	context->rdpsnd->src_format.wBitsPerSample = 16;
-
-	context->rdpsnd->Activated = sf_peer_rdpsnd_activated;
-
-	if (context->rdpsnd->Initialize(context->rdpsnd, TRUE) != CHANNEL_RC_OK)
+	if (WTSVirtualChannelManagerIsChannelJoined(context->vcm, "rdpsnd"))
 	{
-		return FALSE;
+		context->rdpsnd = rdpsnd_server_context_new(context->vcm);
+		context->rdpsnd->rdpcontext = &context->_p;
+		context->rdpsnd->data = context;
+		context->rdpsnd->server_formats = test_audio_formats;
+		context->rdpsnd->num_server_formats =
+		    sizeof(test_audio_formats) / sizeof(test_audio_formats[0]);
+		context->rdpsnd->src_format.wFormatTag = 1;
+		context->rdpsnd->src_format.nChannels = 2;
+		context->rdpsnd->src_format.nSamplesPerSec = 44100;
+		context->rdpsnd->src_format.wBitsPerSample = 16;
+		context->rdpsnd->Activated = sf_peer_rdpsnd_activated;
+
+		if (context->rdpsnd->Initialize(context->rdpsnd, TRUE) != CHANNEL_RC_OK)
+			return FALSE;
+
+		return TRUE;
 	}
 
-	return TRUE;
+#endif
+	return FALSE;
+}
+
+void sf_peer_rdpsnd_uninit(testPeerContext* context)
+{
+#if defined(CHANNEL_RDPSND_SERVER)
+
+	if (context->rdpsnd)
+		rdpsnd_server_context_free(context->rdpsnd);
+
+#endif
 }

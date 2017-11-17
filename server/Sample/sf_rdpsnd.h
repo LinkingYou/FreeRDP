@@ -20,13 +20,16 @@
 #ifndef FREERDP_SERVER_SAMPLE_SF_RDPSND_H
 #define FREERDP_SERVER_SAMPLE_SF_RDPSND_H
 
-#include <freerdp/freerdp.h>
-#include <freerdp/listener.h>
-#include <freerdp/server/rdpsnd.h>
+#if !defined(CHANNEL_RDPSND) || !defined(CHANNEL_RDPSND_SERVER)
+#error "CHANNEL_RDPSND or CHANNEL_RDPSND_SERVER not defined!"
+#endif
+
+#include <winpr/wtypes.h>
 
 #include "sfreerdp.h"
 
 BOOL sf_peer_rdpsnd_init(testPeerContext* context);
+void sf_peer_rdpsnd_uninit(testPeerContext* context);
 
 #endif /* FREERDP_SERVER_SAMPLE_SF_RDPSND_H */
 

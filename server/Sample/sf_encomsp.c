@@ -27,14 +27,32 @@
 
 BOOL sf_peer_encomsp_init(testPeerContext* context)
 {
-	context->encomsp = encomsp_server_context_new(context->vcm);
-	context->encomsp->rdpcontext = &context->_p;
+#if defined(CHANNEL_ENCOMSP_SERVER)
 
-	if (!context->encomsp)
-		return FALSE;
+	if (WTSVirtualChannelManagerIsChannelJoined(context->vcm, ENCOMSP_SVC_CHANNEL_NAME))
+	{
+		context->encomsp = encomsp_server_context_new(context->vcm);
+		context->encomsp->rdpcontext = &context->_p;
 
-	if (context->encomsp->Start(context->encomsp) != CHANNEL_RC_OK)
-		return FALSE;
+		if (!context->encomsp)
+			return FALSE;
 
-	return TRUE;
+		if (context->encomsp->Start(context->encomsp) != CHANNEL_RC_OK)
+			return FALSE;
+
+		return TRUE;
+	}
+
+#endif
+	return FALSE;
+}
+
+void sf_peer_encomsp_uninit(testPeerContext* context)
+{
+#if defined(CHANNEL_ENCOMSP_SERVER)
+
+	if (context->encomsp)
+		encomsp_server_context_free(context->encomsp);
+
+#endif
 }

@@ -20,12 +20,14 @@
 #ifndef FREERDP_SERVER_SAMPLE_SF_ENCOMSP_H
 #define FREERDP_SERVER_SAMPLE_SF_ENCOMSP_H
 
-#include <freerdp/freerdp.h>
-#include <freerdp/listener.h>
-#include <freerdp/server/encomsp.h>
+#if !defined(CHANNEL_ENCOMSP) || !defined(CHANNEL_ENCOMSP_SERVER)
+#error "CHANNEL_ENCOMSP or CHANNEL_ENCOMSP_SERVER not defined!"
+#endif
+#include <winpr/wtypes.h>
 
 #include "sfreerdp.h"
 
 BOOL sf_peer_encomsp_init(testPeerContext* context);
+void sf_peer_encomsp_uninit(testPeerContext* context);
 
 #endif /* FREERDP_SERVER_SAMPLE_SF_ENCOMSP_H */

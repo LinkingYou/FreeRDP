@@ -36,11 +36,16 @@
 #include <freerdp/channels/channels.h>
 
 #include <freerdp/constants.h>
-#include <freerdp/server/rdpsnd.h>
 
+#if defined(CHANNEL_AUDIN_SERVER)
 #include "sf_audin.h"
+#endif
+#if defined(CHANNEL_RDPSND_SERVER)
 #include "sf_rdpsnd.h"
+#endif
+#if defined(CHANNEL_ENCOMSP_SERVER)
 #include "sf_encomsp.h"
+#endif
 
 #include "sfreerdp.h"
 
@@ -116,15 +121,15 @@ void test_peer_context_free(freerdp_peer* client, testPeerContext* context)
 		if (context->debug_channel)
 			WTSVirtualChannelClose(context->debug_channel);
 
-		if (context->audin)
-			audin_server_context_free(context->audin);
-
-		if (context->rdpsnd)
-			rdpsnd_server_context_free(context->rdpsnd);
-
-		if (context->encomsp)
-			encomsp_server_context_free(context->encomsp);
-
+#if defined(CHANNEL_AUDIN_SERVER)
+		sf_peer_audin_uninit(context);
+#endif
+#if defined(CHANNEL_RDPSND_SERVER)
+		sf_peer_rdpsnd_uninit(context);
+#endif
+#if defined(CHANNEL_ENCOMSP_SERVER)
+		sf_peer_encomsp_uninit(context);
+#endif
 		WTSCloseServer((HANDLE) context->vcm);
 	}
 }
@@ -590,18 +595,16 @@ BOOL tf_peer_post_connect(freerdp_peer* client)
 		}
 	}
 
-	if (WTSVirtualChannelManagerIsChannelJoined(context->vcm, "rdpsnd"))
-	{
-		sf_peer_rdpsnd_init(context); /* Audio Output */
-	}
-
-	if (WTSVirtualChannelManagerIsChannelJoined(context->vcm, "encomsp"))
-	{
-		sf_peer_encomsp_init(context); /* Lync Multiparty */
-	}
-
+#if defined(CHANNEL_RDPSND_SERVER)
+	sf_peer_rdpsnd_init(context); /* Audio Output */
+#endif
+#if defined(CHANNEL_ENCOMSP_SERVER)
+	sf_peer_encomsp_init(context); /* Lync Multiparty */
+#endif
 	/* Dynamic Virtual Channels */
+#if defined(CHANNEL_AUDIN_SERVER)
 	sf_peer_audin_init(context); /* Audio Input */
+#endif
 	/* Return FALSE here would stop the execution of the peer main loop. */
 	return TRUE;
 }
@@ -674,19 +677,14 @@ BOOL tf_peer_keyboard_event(rdpInput* input, UINT16 flags, UINT16 code)
 	{
 		client->Close(client);
 	}
+
+#if defined(CHANNEL_AUDIN_SERVER)
 	else if ((flags & 0x4000) && code == 0x13) /* 'r' key */
 	{
-		if (!context->audin_open)
-		{
-			context->audin->Open(context->audin);
-			context->audin_open = TRUE;
-		}
-		else
-		{
-			context->audin->Close(context->audin);
-			context->audin_open = FALSE;
-		}
+		sf_peer_audin_toggle(context);
 	}
+
+#endif
 	else if ((flags & 0x4000) && code == 0x1F) /* 's' key */
 	{
 	}

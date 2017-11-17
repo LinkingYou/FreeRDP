@@ -20,15 +20,27 @@ set(MODULE_PREFIX "FREERDP_SERVER_SAMPLE")
 
 set(${MODULE_PREFIX}_SRCS
 	sfreerdp.c
-	sfreerdp.h
-	sf_audin.c
-	sf_audin.h
-	sf_rdpsnd.c
-	sf_rdpsnd.h
-	sf_encomsp.c
-	sf_encomsp.h)
+	sfreerdp.h)
 
-	# On windows create dll version information.
+if (CHANNEL_AUDIN_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		sf_audin.c
+		sf_audin.h)
+endif()
+
+if (CHANNEL_ENCOMSP_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		sf_encomsp.c
+		sf_encomsp.h)
+endif()
+
+if (CHANNEL_RDPSND_SERVER)
+	list(APPEND ${MODULE_PREFIX}_SRCS
+		sf_rdpsnd.c
+		sf_rdpsnd.h)
+endif()
+
+    # On windows create dll version information.
 # Vendor, product and year are already set in top level CMakeLists.txt
 if (WIN32)
   set (RC_VERSION_MAJOR ${FREERDP_VERSION_MAJOR})
@@ -37,9 +49,9 @@ if (WIN32)
   set (RC_VERSION_FILE "${MODULE_NAME}${CMAKE_EXECUTABLE_SUFFIX}" )
 
   configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
-    @ONLY)
+	${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY)
 
   set ( ${MODULE_PREFIX}_SRCS ${${MODULE_PREFIX}_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 endif()
@@ -52,7 +64,7 @@ set(${MODULE_PREFIX}_LIBS ${${MODULE_PREFIX}_LIBS} winpr freerdp)
 target_link_libraries(${MODULE_NAME} ${${MODULE_PREFIX}_LIBS})
 install(TARGETS ${MODULE_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
 if (WITH_DEBUG_SYMBOLS AND MSVC)
-    install(FILES ${CMAKE_PDB_BINARY_DIR}/${MODULE_NAME}.pdb DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT symbols)
+	install(FILES ${CMAKE_PDB_BINARY_DIR}/${MODULE_NAME}.pdb DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT symbols)
 endif()
 
 set_property(TARGET ${MODULE_NAME} PROPERTY FOLDER "Server/Sample")

@@ -25,9 +25,15 @@
 #include <freerdp/codec/rfx.h>
 #include <freerdp/codec/nsc.h>
 #include <freerdp/channels/wtsvc.h>
+#if defined(CHANNEL_AUDIN_SERVER)
 #include <freerdp/server/audin.h>
+#endif
+#if defined(CHANNEL_RDPSND_SERVER)
 #include <freerdp/server/rdpsnd.h>
+#endif
+#if defined(CHANNEL_ENCOMSP_SERVER)
 #include <freerdp/server/encomsp.h>
+#endif
 
 #include <winpr/crt.h>
 #include <winpr/synch.h>
@@ -52,11 +58,18 @@ struct test_peer_context
 	HANDLE vcm;
 	void* debug_channel;
 	HANDLE debug_channel_thread;
+#if defined(CHANNEL_AUDIN_SERVER)
 	audin_server_context* audin;
 	BOOL audin_open;
+#endif
+
 	UINT32 frame_id;
+#if defined(CHANNEL_RDPSND_SERVER)
 	RdpsndServerContext* rdpsnd;
+#endif
+#if defined(CHANNEL_ENCOMSP_SERVER)
 	EncomspServerContext* encomsp;
+#endif
 };
 typedef struct test_peer_context testPeerContext;
 
