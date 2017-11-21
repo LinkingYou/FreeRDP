@@ -729,27 +729,6 @@ static int freerdp_uds_connect(const char* path)
 #endif
 }
 
-static BOOL freerdp_tcp_resolve_hostname(rdpContext* context, const char* hostname)
-{
-	int status;
-	struct addrinfo hints = { 0 };
-	struct addrinfo* result = NULL;
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	status = getaddrinfo(hostname, NULL, &hints, &result);
-
-	if (status)
-	{
-		if (!freerdp_get_last_error(context))
-			freerdp_set_last_error(context, FREERDP_ERROR_DNS_NAME_NOT_FOUND);
-
-		return FALSE;
-	}
-
-	freeaddrinfo(result);
-	return TRUE;
-}
-
 static BOOL freerdp_tcp_connect_timeout(rdpContext* context, int sockfd,
                                         struct sockaddr* addr,
                                         socklen_t addrlen, int timeout)
@@ -1083,34 +1062,28 @@ int freerdp_tcp_connect(rdpContext* context, rdpSettings* settings,
 		sockfd = port;
 	else
 	{
+		struct addrinfo hints;
+		char port_str[16];
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		sprintf_s(port_str, sizeof(port_str) - 1, "%d", port);
 		sockfd = -1;
 
-		if (!settings->GatewayEnabled)
+		if (settings->TargetNetAddressCount > 0)
 		{
-			if (!freerdp_tcp_resolve_hostname(context, hostname) || settings->RemoteAssistanceMode)
-			{
-				if (settings->TargetNetAddressCount > 0)
-				{
-					sockfd = freerdp_tcp_connect_multi(
-					             context,
-					             settings->TargetNetAddresses,
-					             settings->TargetNetPorts,
-					             settings->TargetNetAddressCount,
-					             port, timeout);
-				}
-			}
+			sockfd = freerdp_tcp_connect_multi(
+			             context,
+			             settings->TargetNetAddresses,
+			             settings->TargetNetPorts,
+			             settings->TargetNetAddressCount,
+			             port, timeout);
 		}
 
 		if (sockfd <= 0)
 		{
-			char port_str[16];
-			struct addrinfo hints;
+			struct addrinfo* result = NULL;
 			struct addrinfo* addr;
-			struct addrinfo* result;
-			ZeroMemory(&hints, sizeof(hints));
-			hints.ai_family = AF_UNSPEC;
-			hints.ai_socktype = SOCK_STREAM;
-			sprintf_s(port_str, sizeof(port_str) - 1, "%d", port);
 			status = getaddrinfo(hostname, port_str, &hints, &result);
 
 			if (status)
