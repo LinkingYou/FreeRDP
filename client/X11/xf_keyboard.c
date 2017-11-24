@@ -214,12 +214,23 @@ void xf_keyboard_send_key(xfContext* xfc, BOOL down, BYTE keycode)
 	else
 	{
 		freerdp_input_send_keyboard_event_ex(input, down, rdp_scancode);
+	}
 
-		if ((rdp_scancode == RDP_SCANCODE_CAPSLOCK) && (down == FALSE))
+	if (!down)
+	{
+		switch (rdp_scancode)
 		{
-			UINT32 syncFlags;
-			syncFlags = xf_keyboard_get_toggle_keys_state(xfc);
-			input->SynchronizeEvent(input, syncFlags);
+			case RDP_SCANCODE_SCROLLLOCK:
+			case RDP_SCANCODE_CAPSLOCK:
+			case RDP_SCANCODE_NUMLOCK:
+				{
+					const UINT32 syncFlags = xf_keyboard_get_toggle_keys_state(xfc);
+					freerdp_input_send_synchronize_event(input, syncFlags);
+				}
+				break;
+
+			default:
+				break;
 		}
 	}
 }
@@ -614,13 +625,14 @@ BOOL xf_keyboard_set_indicators(rdpContext* context, UINT16 led_flags)
 	return TRUE;
 }
 
-BOOL xf_keyboard_set_ime_status(rdpContext* context, UINT16 imeId, UINT32 imeState, UINT32 imeConvMode)
+BOOL xf_keyboard_set_ime_status(rdpContext* context, UINT16 imeId, UINT32 imeState,
+                                UINT32 imeConvMode)
 {
 	if (!context)
 		return FALSE;
 
-	WLog_WARN(TAG, "KeyboardSetImeStatus(unitId=%04"PRIx16", imeState=%08"PRIx32", imeConvMode=%08"PRIx32") ignored",
+	WLog_WARN(TAG,
+	          "KeyboardSetImeStatus(unitId=%04"PRIx16", imeState=%08"PRIx32", imeConvMode=%08"PRIx32") ignored",
 	          imeId, imeState, imeConvMode);
-
 	return TRUE;
 }
