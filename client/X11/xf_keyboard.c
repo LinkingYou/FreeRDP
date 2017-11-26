@@ -225,7 +225,7 @@ void xf_keyboard_send_key(xfContext* xfc, BOOL down, BYTE keycode)
 			case RDP_SCANCODE_NUMLOCK:
 				{
 					const UINT32 syncFlags = xf_keyboard_get_toggle_keys_state(xfc);
-					freerdp_input_send_synchronize_event(input, syncFlags);
+					freerdp_input_send_focus_in_event(input, syncFlags);
 				}
 				break;
 
