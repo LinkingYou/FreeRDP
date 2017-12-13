@@ -283,7 +283,7 @@ static DVCMAN_CHANNEL* dvcman_channel_new(IWTSVirtualChannelManager*
 		return NULL;
 	}
 
-	if (!InitializeCriticalSectionEx(&(channel->lock), 0 , 0))
+	if (!InitializeCriticalSectionEx(&(channel->lock), 0, 0))
 	{
 		WLog_ERR(TAG, "InitializeCriticalSectionEx failed!");
 		free(channel->channel_name);
@@ -312,17 +312,19 @@ static void dvcman_channel_free(void* arg)
 			IWTSVirtualChannel* ichannel = (IWTSVirtualChannel*) channel;
 
 			if (channel->dvcman && channel->dvcman->drdynvc)
-			{			
+			{
 				DrdynvcClientContext* context = channel->dvcman->drdynvc->context;
+
 				if (context)
 				{
 					IFCALLRET(context->OnChannelDisconnected, error,
-							  context, channel->channel_name,
-							  channel->pInterface);
+					          context, channel->channel_name,
+					          channel->pInterface);
 				}
 			}
 
 			error = IFCALLRESULT(CHANNEL_RC_OK, ichannel->Close, ichannel);
+
 			if (error != CHANNEL_RC_OK)
 				WLog_ERR(TAG, "Close failed with error %"PRIu32"!", error);
 		}
@@ -331,9 +333,9 @@ static void dvcman_channel_free(void* arg)
 			Stream_Release(channel->dvc_data);
 
 		DeleteCriticalSection(&(channel->lock));
-
 		free(channel->channel_name);
 	}
+
 	free(channel);
 }
 
@@ -424,7 +426,6 @@ static UINT dvcman_write_channel(IWTSVirtualChannel* pChannel, ULONG cbSize,
  */
 static UINT dvcman_close_channel_iface(IWTSVirtualChannel* pChannel)
 {
-
 	DVCMAN_CHANNEL* channel = (DVCMAN_CHANNEL*) pChannel;
 
 	if (!channel)
@@ -520,8 +521,8 @@ static UINT dvcman_open_channel(IWTSVirtualChannelManager* pChannelMgr,
 	DVCMAN_CHANNEL* channel;
 	IWTSVirtualChannelCallback* pCallback;
 	UINT error;
-
 	channel = (DVCMAN_CHANNEL*) dvcman_find_channel_by_id(pChannelMgr, ChannelId);
+
 	if (!channel)
 	{
 		WLog_ERR(TAG, "ChannelId %"PRIu32" not found!", ChannelId);
@@ -555,7 +556,6 @@ static UINT dvcman_close_channel(IWTSVirtualChannelManager* pChannelMgr,
 	DVCMAN_CHANNEL* channel;
 	UINT error = CHANNEL_RC_OK;
 	DVCMAN* dvcman = (DVCMAN*) pChannelMgr;
-
 	channel = (DVCMAN_CHANNEL*) dvcman_find_channel_by_id(pChannelMgr, ChannelId);
 
 	if (!channel)
@@ -663,27 +663,86 @@ static UINT dvcman_receive_channel_data(IWTSVirtualChannelManager* pChannelMgr,
 	return status;
 }
 
-static UINT drdynvc_write_variable_uint(wStream* s, UINT32 val)
+static BYTE get_bpp(UINT32 val)
 {
-	UINT cb;
+	if (val == 0)
+		return 0;
 
 	if (val <= 0xFF)
+		return 1;
+
+	if (val <= 0xFFFF)
+		return 2;
+
+	return 4;
+}
+
+static BOOL write_val_uint(wStream* s, UINT32 val, BYTE bpp)
+{
+	if (Stream_GetRemainingCapacity(s) < bpp)
+		return FALSE;
+
+	switch (bpp)
 	{
-		cb = 0;
-		Stream_Write_UINT8(s, val);
-	}
-	else if (val <= 0xFFFF)
-	{
-		cb = 1;
-		Stream_Write_UINT16(s, val);
-	}
-	else
-	{
-		cb = 2;
-		Stream_Write_UINT32(s, val);
+		case 1:
+			Stream_Write_UINT8(s, val);
+			break;
+
+		case 2:
+			Stream_Write_UINT16(s, val);
+			break;
+
+		case 4:
+			Stream_Write_UINT32(s, val);
+			break;
+
+		default:
+			return FALSE;
 	}
 
-	return cb;
+	return TRUE;
+}
+
+static BOOL drdynvc_write_variable_uint(wStream* s, UINT32 ChannelId, UINT32 val, BYTE cmd)
+{
+	const BYTE cbId = get_bpp(ChannelId);
+	const BYTE Len = get_bpp(val);
+	BYTE header;
+
+	if (!s || (cmd >= 0x10) || (Stream_GetRemainingCapacity(s) < 1))
+		return FALSE;
+
+	switch (cmd)
+	{
+		case DATA_PDU:
+		case CLOSE_REQUEST_PDU:
+			header = (cmd << 4) | cbId;
+			break;
+
+		case DYNVC_DATA_FIRST_COMPRESSED:
+		case DATA_FIRST_PDU:
+			header = (cmd << 4) || (Len << 2) | cbId;
+			break;
+
+		default:
+			return FALSE;
+	}
+
+	Stream_Write_UINT8(s, header);
+
+	switch (cmd)
+	{
+		case DATA_PDU:
+		case CLOSE_REQUEST_PDU:
+			return write_val_uint(s, ChannelId, cbId);
+
+		case DYNVC_DATA_FIRST_COMPRESSED:
+		case DATA_FIRST_PDU:
+			return write_val_uint(s, val, Len);
+
+		default:
+			return FALSE;
+	}
 }
 
 /**
@@ -728,8 +787,6 @@ static UINT drdynvc_write_data(drdynvcPlugin* drdynvc, UINT32 ChannelId,
 {
 	wStream* data_out;
 	unsigned long pos;
-	UINT32 cbChId;
-	UINT32 cbLen;
 	unsigned long chunkLength;
 	UINT status;
 
@@ -746,33 +803,33 @@ static UINT drdynvc_write_data(drdynvcPlugin* drdynvc, UINT32 ChannelId,
 		return CHANNEL_RC_NO_MEMORY;
 	}
 
-	Stream_SetPosition(data_out, 1);
-	cbChId = drdynvc_write_variable_uint(data_out, ChannelId);
+	if (!drdynvc_write_variable_uint(data_out, ChannelId, 0, CLOSE_REQUEST_PDU))
+		return ERROR_INTERNAL_ERROR;
+
 	pos = Stream_GetPosition(data_out);
 
 	if (dataSize == 0)
 	{
-		Stream_SetPosition(data_out, 0);
-		Stream_Write_UINT8(data_out, 0x40 | cbChId);
-		Stream_SetPosition(data_out, pos);
 		status = drdynvc_send(drdynvc, data_out);
 	}
 	else if (dataSize <= CHANNEL_CHUNK_LENGTH - pos)
 	{
 		Stream_SetPosition(data_out, 0);
-		Stream_Write_UINT8(data_out, 0x30 | cbChId);
-		Stream_SetPosition(data_out, pos);
+
+		if (!drdynvc_write_variable_uint(data_out, ChannelId, 0, DATA_PDU))
+			return ERROR_INTERNAL_ERROR;
+
 		Stream_Write(data_out, data, dataSize);
 		status = drdynvc_send(drdynvc, data_out);
 	}
 	else
 	{
-		/* Fragment the data */
-		cbLen = drdynvc_write_variable_uint(data_out, dataSize);
-		pos = Stream_GetPosition(data_out);
 		Stream_SetPosition(data_out, 0);
-		Stream_Write_UINT8(data_out, 0x20 | cbChId | (cbLen << 2));
-		Stream_SetPosition(data_out, pos);
+
+		/* Fragment the data */
+		if (!drdynvc_write_variable_uint(data_out, ChannelId, dataSize, DATA_FIRST_PDU))
+			return ERROR_INTERNAL_ERROR;
+
 		chunkLength = CHANNEL_CHUNK_LENGTH - pos;
 		Stream_Write(data_out, data, chunkLength);
 		data += chunkLength;
@@ -789,12 +846,9 @@ static UINT drdynvc_write_data(drdynvcPlugin* drdynvc, UINT32 ChannelId,
 				return CHANNEL_RC_NO_MEMORY;
 			}
 
-			Stream_SetPosition(data_out, 1);
-			cbChId = drdynvc_write_variable_uint(data_out, ChannelId);
-			pos = Stream_GetPosition(data_out);
-			Stream_SetPosition(data_out, 0);
-			Stream_Write_UINT8(data_out, 0x30 | cbChId);
-			Stream_SetPosition(data_out, pos);
+			if (!drdynvc_write_variable_uint(data_out, ChannelId, 0, DATA_PDU))
+				return ERROR_INTERNAL_ERROR;
+
 			chunkLength = dataSize;
 
 			if (chunkLength > CHANNEL_CHUNK_LENGTH - pos)
@@ -950,6 +1004,7 @@ static UINT drdynvc_process_create_request(drdynvcPlugin* drdynvc, int Sp,
 	           Stream_Pointer(s));
 	channel_status = dvcman_create_channel(drdynvc->channel_mgr, ChannelId, (char*) Stream_Pointer(s));
 	data_out = Stream_New(NULL, pos + 4);
+
 	if (!data_out)
 	{
 		WLog_Print(drdynvc->log, WLOG_ERROR, "Stream_New failed!");
@@ -972,6 +1027,7 @@ static UINT drdynvc_process_create_request(drdynvcPlugin* drdynvc, int Sp,
 	}
 
 	status = drdynvc_send(drdynvc, data_out);
+
 	if (status != CHANNEL_RC_OK)
 	{
 		WLog_ERR(TAG, "VirtualChannelWriteEx failed with %s [%08"PRIX32"]",
@@ -1044,7 +1100,6 @@ static UINT drdynvc_process_data(drdynvcPlugin* drdynvc, int Sp, int cbChId,
 static UINT drdynvc_process_close_request(drdynvcPlugin* drdynvc, int Sp,
         int cbChId, wStream* s)
 {
-	int value;
 	UINT error;
 	UINT32 ChannelId;
 	wStream* data_out;
@@ -1059,16 +1114,17 @@ static UINT drdynvc_process_close_request(drdynvcPlugin* drdynvc, int Sp,
 	}
 
 	data_out = Stream_New(NULL, 4);
+
 	if (!data_out)
 	{
 		WLog_ERR(TAG, "Stream_New failed!");
 		return CHANNEL_RC_NO_MEMORY;
 	}
 
-	value = (CLOSE_REQUEST_PDU << 4) | (cbChId & 0x03);
-	Stream_Write_UINT8(data_out, value);
-	drdynvc_write_variable_uint(data_out, ChannelId);
-	error = drdynvc_send(drdynvc, data_out);
+	if (!drdynvc_write_variable_uint(data_out, ChannelId, 0, CLOSE_REQUEST_PDU))
+		error = ERROR_INTERNAL_ERROR;
+	else
+		error = drdynvc_send(drdynvc, data_out);
 
 	if (error)
 		WLog_ERR(TAG, "VirtualChannelWriteEx failed with %s [%08"PRIX32"]",

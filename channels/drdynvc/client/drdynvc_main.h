@@ -111,6 +111,7 @@ typedef enum _DRDYNVC_STATE DRDYNVC_STATE;
 #define DATA_PDU			0x03
 #define CLOSE_REQUEST_PDU		0x04
 #define CAPABILITY_REQUEST_PDU		0x05
+#define DYNVC_DATA_FIRST_COMPRESSED 0x06
 
 struct drdynvc_plugin
 {
