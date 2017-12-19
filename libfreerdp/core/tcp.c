@@ -809,7 +809,7 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
                                      UINT32* ports, UINT32 count, int port,
                                      int timeout)
 {
-	int index;
+	UINT32 index;
 	int sindex;
 	int status;
 	SOCKET sockfd = -1;
@@ -847,12 +847,13 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 			sprintf_s(port_str, sizeof(port_str) - 1, "%"PRIu32"", ports[index]);
 
 		status = getaddrinfo(hostnames[index], port_str, &hints, &result);
+		WLog_DBG(TAG, "hostname=%s, port=%s, getaddrinfo returned %"PRIu32, hostnames[index], port_str,
+		         status);
 
-		if (status)
-		{
+		if (status != 0)
 			continue;
-		}
 
+		WLog_DBG(TAG, "hostname=%s, port=%s connecting...", hostnames[index], port_str);
 		addr = result;
 
 		if ((addr->ai_family == AF_INET6) && (addr->ai_next != 0))
@@ -1085,6 +1086,8 @@ int freerdp_tcp_connect(rdpContext* context, rdpSettings* settings,
 			struct addrinfo* result = NULL;
 			struct addrinfo* addr;
 			status = getaddrinfo(hostname, port_str, &hints, &result);
+			WLog_DBG(TAG, "Fallback: hostname=%s, port=%s, getaddrinfo returned %"PRIu32, hostname, port_str,
+			         status);
 
 			if (status)
 			{
@@ -1095,6 +1098,7 @@ int freerdp_tcp_connect(rdpContext* context, rdpSettings* settings,
 				return -1;
 			}
 
+			WLog_DBG(TAG, "Fallback: hostname=%s, port=%s connecting...", hostname, port_str);
 			addr = result;
 
 			if ((addr->ai_family == AF_INET6) && (addr->ai_next != 0) && !settings->PreferIPv6OverIPv4)
