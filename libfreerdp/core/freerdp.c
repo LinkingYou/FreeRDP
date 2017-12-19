@@ -290,15 +290,7 @@ BOOL freerdp_abort_connect(freerdp* instance)
 	return SetEvent(instance->context->abortEvent);
 }
 
-BOOL freerdp_get_fds(freerdp* instance, void** rfds, int* rcount, void** wfds,
-                     int* wcount)
-{
-	rdpRdp* rdp = instance->context->rdp;
-	transport_get_fds(rdp->transport, rfds, rcount);
-	return TRUE;
-}
-
-BOOL freerdp_check_fds(freerdp* instance)
+static BOOL freerdp_check_fds(freerdp* instance)
 {
 	int status;
 	rdpRdp* rdp;

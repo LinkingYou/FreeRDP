@@ -39,9 +39,6 @@ FREERDP_API int freerdp_channels_client_load_ex(rdpChannels* channels,
 FREERDP_API int freerdp_channels_load_plugin(rdpChannels* channels,
         rdpSettings* settings,
         const char* name, void* data);
-FREERDP_API BOOL freerdp_channels_get_fds(rdpChannels* channels,
-        freerdp* instance, void** read_fds,
-        int* read_count, void** write_fds, int* write_count);
 FREERDP_API BOOL freerdp_channels_check_fds(rdpChannels* channels,
         freerdp* instance);
 

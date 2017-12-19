@@ -238,13 +238,6 @@ static BOOL freerdp_peer_initialize(freerdp_peer* client)
 	return TRUE;
 }
 
-static BOOL freerdp_peer_get_fds(freerdp_peer* client, void** rfds, int* rcount)
-{
-	rdpTransport* transport = client->context->rdp->transport;
-	transport_get_fds(transport, rfds, rcount);
-	return TRUE;
-}
-
 static HANDLE freerdp_peer_get_event_handle(freerdp_peer* client)
 {
 	HANDLE hEvent = NULL;
@@ -582,7 +575,6 @@ static int peer_recv_callback(rdpTransport* transport, wStream* s, void* extra)
 		case CONNECTION_STATE_CAPABILITIES_EXCHANGE:
 			if (!rdp->AwaitCapabilities)
 			{
-
 				if (client->Capabilities && !client->Capabilities(client))
 					return -1;
 
@@ -807,7 +799,6 @@ freerdp_peer* freerdp_peer_new(int sockfd)
 		client->sockfd = sockfd;
 		client->ContextSize = sizeof(rdpContext);
 		client->Initialize = freerdp_peer_initialize;
-		client->GetFileDescriptor = freerdp_peer_get_fds;
 		client->GetEventHandle = freerdp_peer_get_event_handle;
 		client->GetEventHandles = freerdp_peer_get_event_handles;
 		client->CheckFileDescriptor = freerdp_peer_check_fds;

@@ -516,25 +516,6 @@ static int freerdp_channels_process_sync(rdpChannels* channels,
 	return status;
 }
 
-/**
- * called only from main thread
- */
-BOOL freerdp_channels_get_fds(rdpChannels* channels, freerdp* instance,
-                              void** read_fds,
-                              int* read_count, void** write_fds, int* write_count)
-{
-	void* pfd;
-	pfd = GetEventWaitObject(MessageQueue_Event(channels->queue));
-
-	if (pfd)
-	{
-		read_fds[*read_count] = pfd;
-		(*read_count)++;
-	}
-
-	return TRUE;
-}
-
 void* freerdp_channels_get_static_channel_interface(rdpChannels* channels,
         const char* name)
 {

@@ -100,8 +100,6 @@ FREERDP_LOCAL void transport_stop(rdpTransport* transport);
 FREERDP_LOCAL int transport_read_pdu(rdpTransport* transport, wStream* s);
 FREERDP_LOCAL int transport_write(rdpTransport* transport, wStream* s);
 
-FREERDP_LOCAL void transport_get_fds(rdpTransport* transport, void** rfds,
-                                     int* rcount);
 FREERDP_LOCAL int transport_check_fds(rdpTransport* transport);
 
 FREERDP_LOCAL DWORD transport_get_event_handles(rdpTransport* transport,

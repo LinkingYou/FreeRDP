@@ -941,22 +941,6 @@ DWORD transport_get_event_handles(rdpTransport* transport, HANDLE* events,
 	return nCount;
 }
 
-void transport_get_fds(rdpTransport* transport, void** rfds, int* rcount)
-{
-	DWORD index;
-	DWORD nCount;
-	HANDLE events[64];
-	nCount = transport_get_event_handles(transport, events, 64);
-	*rcount = nCount + 1;
-
-	for (index = 0; index < nCount; index++)
-	{
-		rfds[index] = GetEventWaitObject(events[index]);
-	}
-
-	rfds[nCount + 1] = GetEventWaitObject(transport->rereadEvent);
-}
-
 BOOL transport_is_write_blocked(rdpTransport* transport)
 {
 	return BIO_write_blocked(transport->frontBio);
