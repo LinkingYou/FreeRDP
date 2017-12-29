@@ -868,10 +868,38 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 				addr = result;
 		}
 
+		{
+			char ip[INET6_ADDRSTRLEN];
+			char* ptr;
+
+			switch (addr->ai_family)
+			{
+				case AF_INET:
+					ptr = &((struct sockaddr_in*)addr->ai_addr)->sin_addr;
+					break;
+
+				case AF_INET6:
+					ptr = &((struct sockaddr_in6*)addr->ai_addr)->sin6_addr;
+					break;
+
+				default:
+					ptr = "wtf?";
+					break;
+			}
+
+			inet_ntop(addr->ai_family, ip, ptr, addr->ai_addrlen);
+			WLog_DBG(TAG, "ai_flags=%d, ai_family=%d, ai_socktype=%d, ad_protocol=%d, "
+			         "ai_addrlen=%lu, ai_addr=%p, ai_canonname=%s, ai_next=%p, ip=%s",
+			         addr->ai_flags, addr->ai_family, addr->ai_socktype,
+			         addr->ai_protocol, addr->ai_addrlen, addr->ai_addr,
+			         addr->ai_canonname, addr->ai_next, ip);
+		}
+
 		sockfds[index] = _socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 
 		if (sockfds[index] == INVALID_SOCKET)
 		{
+			WLog_ERR(TAG, "Failed to open socked %s [%d]", strerror(errno), errno);
 			freeaddrinfo(result);
 			sockfds[index] = 0;
 			continue;
@@ -883,10 +911,12 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 
 	for (index = 0; index < count; index++)
 	{
+		SOCKET s;
+
 		if (!sockfds[index])
 			continue;
 
-		sockfd = sockfds[index];
+		s = sockfds[index];
 		addr = addrs[index];
 		/* set socket in non-blocking mode */
 		events[index] = WSACreateEvent();
@@ -897,14 +927,14 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 			continue;
 		}
 
-		if (WSAEventSelect(sockfd, events[index], FD_READ | FD_WRITE | FD_CONNECT | FD_CLOSE))
+		if (WSAEventSelect(s, events[index], FD_READ | FD_WRITE | FD_CONNECT | FD_CLOSE))
 		{
 			WLog_ERR(TAG, "WSAEventSelect returned 0x%08X", WSAGetLastError());
 			continue;
 		}
 
 		/* non-blocking tcp connect */
-		status = _connect(sockfd, addr->ai_addr, addr->ai_addrlen);
+		status = _connect(s, addr->ai_addr, addr->ai_addrlen);
 
 		if (status >= 0)
 		{
@@ -919,30 +949,29 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 
 	for (index = 0; index < count; index++)
 	{
+		SOCKET s;
 		u_long arg = 0;
 
 		if (!sockfds[index])
 			continue;
 
-		sockfd = sockfds[index];
+		s = sockfds[index];
 
 		/* set socket in blocking mode */
-		if (WSAEventSelect(sockfd, NULL, 0))
+		if (WSAEventSelect(s, NULL, 0))
 		{
 			WLog_ERR(TAG, "WSAEventSelect returned 0x%08X", WSAGetLastError());
 			continue;
 		}
 
-		if (_ioctlsocket(sockfd, FIONBIO, &arg))
+		if (_ioctlsocket(s, FIONBIO, &arg))
 		{
 			WLog_ERR(TAG, "_ioctlsocket failed");
 		}
 	}
 
 	if ((sindex >= 0) && (sindex < count))
-	{
 		sockfd = sockfds[sindex];
-	}
 
 	if (sindex == count)
 		freerdp_set_last_error(context, FREERDP_ERROR_CONNECT_CANCELLED);
@@ -953,6 +982,9 @@ static int freerdp_tcp_connect_multi(rdpContext* context, char** hostnames,
 			freeaddrinfo(results[index]);
 
 		CloseHandle(events[index]);
+
+		if ((sockfd > 0) && (sockfd != sockfds[index]))
+			close(sockfds[index]);
 	}
 
 	free(addrs);
