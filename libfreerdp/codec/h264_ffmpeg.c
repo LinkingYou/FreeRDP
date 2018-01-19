@@ -26,8 +26,6 @@
 #include <libavutil/opt.h>
 #include <libavutil/mem.h>
 
-#define TAG FREERDP_TAG("codec")
-
 /* Fallback support for older libavcodec versions */
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 59, 100)
 #define AV_CODEC_ID_H264 CODEC_ID_H264
@@ -220,17 +218,17 @@ static int libavcodec_decompress(H264_CONTEXT* h264, const BYTE* pSrcData,
 	}
 
 #if 0
-	WLog_Print(h264->log, WLOG_INFO, (TAG,
-	                                  "libavcodec_decompress: frame decoded (status=%d, gotFrame=%d, width=%d, height=%d, Y=[%p,%d], U=[%p,%d], V=[%p,%d])",
-	                                  status, gotFrame, sys->videoFrame->width, sys->videoFrame->height,
-	                                  (void*) sys->videoFrame->data[0], sys->videoFrame->linesize[0],
-	                                  (void*) sys->videoFrame->data[1], sys->videoFrame->linesize[1],
-	                                  (void*) sys->videoFrame->data[2], sys->videoFrame->linesize[2]);
+	WLog_Print(h264->log, WLOG_INFO,
+	           "libavcodec_decompress: frame decoded (status=%d, gotFrame=%d, width=%d, height=%d, Y=[%p,%d], U=[%p,%d], V=[%p,%d])",
+	           status, gotFrame, sys->videoFrame->width, sys->videoFrame->height,
+	           (void*) sys->videoFrame->data[0], sys->videoFrame->linesize[0],
+	           (void*) sys->videoFrame->data[1], sys->videoFrame->linesize[1],
+	           (void*) sys->videoFrame->data[2], sys->videoFrame->linesize[2]);
 #endif
 
-	           if (gotFrame)
-{
-	pYUVData[0] = sys->videoFrame->data[0];
+	if (gotFrame)
+	{
+		pYUVData[0] = sys->videoFrame->data[0];
 		pYUVData[1] = sys->videoFrame->data[1];
 		pYUVData[2] = sys->videoFrame->data[2];
 		iStride[0] = sys->videoFrame->linesize[0];
@@ -241,8 +239,9 @@ static int libavcodec_decompress(H264_CONTEXT* h264, const BYTE* pSrcData,
 	}
 	else
 		return -2;
-		       return 1;
-	}
+
+	return 1;
+}
 
 static int libavcodec_compress(H264_CONTEXT* h264, BYTE** ppDstData, UINT32* pDstSize)
 {
