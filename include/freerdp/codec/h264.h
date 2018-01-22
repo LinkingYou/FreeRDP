@@ -93,7 +93,7 @@ FREERDP_API INT32 avc420_decompress(H264_CONTEXT* h264, const BYTE* pSrcData,
 
 FREERDP_API INT32 avc444_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
                                   UINT32 nSrcStep, UINT32 nSrcWidth, UINT32 nSrcHeight,
-                                  BYTE* op,
+                                  BYTE* op, BYTE codecID,
                                   BYTE** pDstData, UINT32* pDstSize,
                                   BYTE** pAuxDstData, UINT32* pAuxDstSize);
 

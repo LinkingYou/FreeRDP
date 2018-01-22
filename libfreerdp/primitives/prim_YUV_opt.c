@@ -648,6 +648,9 @@ static pstatus_t ssse3_RGBToAVC444YUV_BGRX(
 			return status;
 	}
 
+	if (!pDst2)
+		return PRIMITIVES_SUCCESS;
+
 	numRows = (roi->height + 1) & ~1;
 
 	for (y = 0; y < numRows; y++, evenRow = !evenRow)

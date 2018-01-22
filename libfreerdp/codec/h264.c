@@ -210,14 +210,47 @@ INT32 avc420_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
 	return h264->subsystem->Compress(h264, ppDstData, pDstSize);
 }
 
+static INT32 rgb_to_yuv(BYTE codecId, const BYTE* pSrcData, DWORD SrcFormat, UINT32 nSrcStep,
+                        BYTE* pMainDst[3], const UINT32 dstMainStep[3],
+                        BYTE* pAuxDst[3], const UINT32 dstAuxStep[3],
+                        const prim_size_t* roi)
+{
+	primitives_t* prims = primitives_get();
+
+	switch (codecId)
+	{
+		case RDPGFX_CODECID_AVC444:
+			if (prims->RGBToAVC444YUV(pSrcData, SrcFormat, nSrcStep,
+			                          pMainDst, dstMainStep,
+			                          pAuxDst, dstAuxStep, roi) != PRIMITIVES_SUCCESS)
+				return -1;
+
+			break;
+
+		case RDPGFX_CODECID_AVC444v2:
+			if (prims->RGBToAVC444YUVv2(pSrcData, SrcFormat, nSrcStep,
+			                            pMainDst, dstMainStep,
+			                            pAuxDst, dstAuxStep, roi) != PRIMITIVES_SUCCESS)
+				return -1;
+
+			break;
+
+		default:
+			return -1;
+	}
+
+	return PRIMITIVES_SUCCESS;
+}
+
 INT32 avc444_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
                       UINT32 nSrcStep, UINT32 nSrcWidth, UINT32 nSrcHeight,
-                      BYTE* op, BYTE** ppDstData, UINT32* pDstSize,
+                      BYTE* op, BYTE codecID, BYTE** ppDstData, UINT32* pDstSize,
                       BYTE** ppAuxDstData, UINT32* pAuxDstSize)
 {
 	INT32 status = 0;
 	prim_size_t roi;
-	primitives_t* prims = primitives_get();
+	BYTE* data;
+	UINT32 size;
 
 	if (!h264)
 		return -1;
@@ -234,27 +267,35 @@ INT32 avc444_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
 	/* Luma */
 	if (ppDstData)
 	{
-		if (prims->RGBToAVC444YUVv2(pSrcData, SrcFormat, nSrcStep, NULL, NULL,
-		                            h264->pYUVData, h264->iStride, &roi) != PRIMITIVES_SUCCESS)
+		if (rgb_to_yuv(codecID, pSrcData, SrcFormat, nSrcStep,
+		               h264->pYUVData, h264->iStride, NULL, NULL, &roi) != PRIMITIVES_SUCCESS)
 			return -1;
 
-		status = h264->subsystem->Compress(h264, ppDstData, pDstSize);
+		status = h264->subsystem->Compress(h264, &data, &size);
 
 		if (status < 0)
 			return status;
+
+		*ppDstData = _aligned_malloc(size, 128);
+		memcpy(*ppDstData, data, size);
+		*pDstSize = size;
 	}
 
 	/* Chroma */
 	if (ppAuxDstData)
 	{
-		if (prims->RGBToAVC444YUVv2(pSrcData, SrcFormat, nSrcStep,
-		                            h264->pYUVData, h264->iStride, NULL, NULL, &roi) != PRIMITIVES_SUCCESS)
+		if (rgb_to_yuv(codecID, pSrcData, SrcFormat, nSrcStep, NULL, NULL,
+		               h264->pYUVData, h264->iStride, &roi) != PRIMITIVES_SUCCESS)
 			return -1;
 
-		status = h264->subsystem->Compress(h264, ppAuxDstData, pAuxDstSize);
+		status = h264->subsystem->Compress(h264, &data, &size);
 
 		if (status < 0)
 			return status;
+
+		*ppAuxDstData = _aligned_malloc(size, 128);
+		memcpy(*ppAuxDstData, data, size);
+		*pAuxDstSize = size;
 	}
 
 	if (ppAuxDstData && ppDstData)

@@ -813,7 +813,7 @@ static BOOL shadow_client_send_surface_gfx(rdpShadowClient* client,
 
 	if (settings->GfxAVC444)
 	{
-		RDPGFX_AVC444_BITMAP_STREAM avc444;
+		RDPGFX_AVC444_BITMAP_STREAM avc444 = { 0 };
 		RECTANGLE_16 regionRect;
 		RDPGFX_H264_QUANT_QUALITY quantQualityVal;
 
@@ -823,12 +823,16 @@ static BOOL shadow_client_send_surface_gfx(rdpShadowClient* client,
 			return FALSE;
 		}
 
+		cmd.codecId = RDPGFX_CODECID_AVC444v2;
+
 		if (avc444_compress(encoder->h264, pSrcData, cmd.format, nSrcStep,
-		                    nWidth, nHeight, &avc444.LC, &avc444.bitstream[0].data,
+		                    nWidth, nHeight, &avc444.LC, cmd.codecId, &avc444.bitstream[0].data,
 		                    &avc444.bitstream[0].length, &avc444.bitstream[1].data,
 		                    &avc444.bitstream[1].length) < 0)
 		{
 			WLog_ERR(TAG, "avc420_compress failed for avc444");
+			_aligned_free(avc444.bitstream[0].data);
+			_aligned_free(avc444.bitstream[1].data);
 			return FALSE;
 		}
 
@@ -847,10 +851,11 @@ static BOOL shadow_client_send_surface_gfx(rdpShadowClient* client,
 		avc444.bitstream[1].meta.regionRects = &regionRect;
 		avc444.bitstream[1].meta.quantQualityVals = &quantQualityVal;
 		avc444.cbAvc420EncodedBitstream1 = rdpgfx_estimate_h264_avc420(&avc444.bitstream[0]);
-		cmd.codecId = RDPGFX_CODECID_AVC444v2;
 		cmd.extra = (void*)&avc444;
 		IFCALLRET(client->rdpgfx->SurfaceFrameCommand, error, client->rdpgfx, &cmd,
 		          &cmdstart, &cmdend);
+		_aligned_free(avc444.bitstream[0].data);
+		_aligned_free(avc444.bitstream[1].data);
 
 		if (error)
 		{

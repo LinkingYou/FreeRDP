@@ -626,9 +626,23 @@ static UINT rdpgfx_write_surface_command(wStream* s,
 		}
 		else if ((cmd->codecId == RDPGFX_CODECID_AVC444) || (cmd->codecId == RDPGFX_CODECID_AVC444v2))
 		{
+			UINT32 bs1;
 			havc444 = (RDPGFX_AVC444_BITMAP_STREAM*)cmd->extra;
 			havc420 = &(havc444->bitstream[0]);			/* avc420EncodedBitstreamInfo (4 bytes) */
-			Stream_Write_UINT32(s, havc444->cbAvc420EncodedBitstream1 | (havc444->LC << 30UL));
+			bs1 = (havc444->LC << 30UL);
+
+			switch (havc444->LC)
+			{
+				case 0:
+				case 1:
+					bs1 |= havc444->cbAvc420EncodedBitstream1;
+					break;
+
+				default:
+					break;
+			}
+
+			Stream_Write_UINT32(s, bs1);
 			/* avc420EncodedBitstream1 */
 			error = rdpgfx_write_h264_avc420(s, havc420);
 

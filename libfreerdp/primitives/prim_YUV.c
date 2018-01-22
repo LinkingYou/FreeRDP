@@ -1322,18 +1322,16 @@ static INLINE pstatus_t general_RGBToAVC444YUVv2_ANY(
 
 	for (y = 0; y < roi->height; y++)
 	{
-		const BYTE* src = pSrc + y * srcStep;
-		BYTE* b4  = pDst2 ? (pDst2[0] + y * dst2Step[0]) : NULL;
-		BYTE* b5  = pDst2 ? (pDst2[0] + y * dst2Step[0] + dst2Step[0] / 2) : NULL;
+		const BYTE* src = pSrc + y * srcStep + 4;
+		BYTE* b4  = pDst2[0] + y * dst2Step[0];
+		BYTE* b5  = pDst2[0] + y * dst2Step[0] + dst2Step[0] / 2;
 
-		for (x = 0; x < roi->width; x++)
+		for (x = 1; x < roi->width; x += 2)
 		{
 			const UINT32 color = ReadColor(src, srcFormat);
 			BYTE r, g, b;
 			SplitColor(color, srcFormat, &r, &g, &b, NULL, NULL);
-			src += 4;
-
-			if (b4 && b5 && ((x & 1) == 1))
+			src += 8;
 			{
 				const BYTE u = RGB2U(r, g, b);
 				const BYTE v = RGB2V(r, g, b);
