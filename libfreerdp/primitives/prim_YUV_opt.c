@@ -518,14 +518,13 @@ static pstatus_t ssse3_RGBToYUV420(
 /****************************************************************************/
 
 static INLINE void ssse3_RGBToAVC444YUV_BGRX_ROW(
-    const BYTE* src, BYTE* ydst, BYTE* udst1, BYTE* udst2, BYTE* vdst1, BYTE* vdst2, BOOL isEvenRow,
+    const BYTE* src, BYTE* udst1, BYTE* udst2, BYTE* vdst1, BYTE* vdst2, BOOL isEvenRow,
     UINT32 width)
 {
 	UINT32 x;
 	__m128i vector128, y_factors, u_factors, v_factors, smask;
 	__m128i x1, x2, x3, x4, y, y1, y2, u, u1, u2, v, v1, v2;
 	const __m128i* argb = (const __m128i*) src;
-	__m128i* py = (__m128i*) ydst;
 	__m64* pu1 = (__m64*) udst1;
 	__m64* pu2 = (__m64*) udst2;
 	__m64* pv1 = (__m64*) vdst1;
@@ -571,28 +570,43 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_ROW(
 		v = _mm_packs_epi16(v1, v2);
 		/* V: add 128 */
 		v = _mm_add_epi8(v, vector128);
-		/* store y */
-		_mm_storeu_si128(py++, y);
 
 		/* store u and v */
 		if (isEvenRow)
 		{
 			u = _mm_shuffle_epi8(u, smask);
 			v = _mm_shuffle_epi8(v, smask);
-			_mm_storel_pi(pu1++, _mm_castsi128_ps(u));
+
+			if (pu1)
+				_mm_storel_pi(pu1++, _mm_castsi128_ps(u));
+
 			_mm_storeh_pi(pu2++, _mm_castsi128_ps(u));
-			_mm_storel_pi(pv1++, _mm_castsi128_ps(v));
+
+			if (pv1)
+				_mm_storel_pi(pv1++, _mm_castsi128_ps(v));
+
 			_mm_storeh_pi(pv2++, _mm_castsi128_ps(v));
 		}
 		else
 		{
-			_mm_storel_pi(pu1, _mm_castsi128_ps(u));
+			if (pu1)
+				_mm_storel_pi(pu1, _mm_castsi128_ps(u));
+
 			_mm_storeh_pi(pu2, _mm_castsi128_ps(u));
-			_mm_storel_pi(pv1, _mm_castsi128_ps(v));
+
+			if (pv1)
+				_mm_storel_pi(pv1, _mm_castsi128_ps(v));
+
 			_mm_storeh_pi(pv2, _mm_castsi128_ps(v));
-			pu1 += 2;
+
+			if (pu1)
+				pu1 += 2;
+
 			pu2 += 2;
-			pv1 += 2;
+
+			if (pv1)
+				pv1 += 2;
+
 			pv2 += 2;
 		}
 	}
@@ -607,7 +621,7 @@ static pstatus_t ssse3_RGBToAVC444YUV_BGRX(
 {
 	UINT32 y, numRows;
 	BOOL evenRow = TRUE;
-	BYTE* b1, *b2, *b3, *b4, *b5, *b6, *b7;
+	BYTE* b4, *b5, *b6, *b7;
 	const BYTE* pMaxSrc = pSrc + (roi->height - 1) * srcStep;
 
 	if (roi->height < 1 || roi->width < 1)
@@ -620,27 +634,38 @@ static pstatus_t ssse3_RGBToAVC444YUV_BGRX(
 		return generic->RGBToAVC444YUV(pSrc, srcFormat, srcStep, pDst1, dst1Step, pDst2, dst2Step, roi);
 	}
 
+	if (pDst1)
+	{
+		pstatus_t status;
+		primitives_t* prim = primitives_get();
+
+		if (!prim)
+			return -1;
+
+		status = prim->RGBToYUV420_8u_P3AC4R(pSrc, srcFormat, srcStep, pDst1, dst1Step, roi);
+
+		if (status != PRIMITIVES_SUCCESS)
+			return status;
+	}
+
 	numRows = (roi->height + 1) & ~1;
 
 	for (y = 0; y < numRows; y++, evenRow = !evenRow)
 	{
 		const BYTE* src = y < roi->height ? pSrc + y * srcStep : pMaxSrc;
 		UINT32 i = y >> 1;
-		b1  = pDst1[0] + y * dst1Step[0];
 
 		if (evenRow)
 		{
-			b2 = pDst1[1] + i * dst1Step[1];
-			b3 = pDst1[2] + i * dst1Step[2];
 			b6 = pDst2[1] + i * dst2Step[1];
 			b7 = pDst2[2] + i * dst2Step[2];
-			ssse3_RGBToAVC444YUV_BGRX_ROW(src, b1, b2, b6, b3, b7, TRUE, roi->width);
+			ssse3_RGBToAVC444YUV_BGRX_ROW(src, NULL, b6, NULL, b7, TRUE, roi->width);
 		}
 		else
 		{
 			b4 = pDst2[0] + dst2Step[0] * ((i & ~7) + i);
 			b5 = b4 + 8 * dst2Step[0];
-			ssse3_RGBToAVC444YUV_BGRX_ROW(src, b1, b4, b4 + 8, b5, b5 + 8, FALSE, roi->width);
+			ssse3_RGBToAVC444YUV_BGRX_ROW(src, b4, b4 + 8, b5, b5 + 8, FALSE, roi->width);
 		}
 	}
 
