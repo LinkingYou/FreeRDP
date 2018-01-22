@@ -340,13 +340,13 @@ globals directly the functions below could be passed pointers to the correct vec
 depending on the source picture format.
 
 PRIM_ALIGN_128 static const BYTE rgbx_y_factors[] = {
-	  27,  92,   9,   0,  27,  92,   9,   0,  27,  92,   9,   0,  27,  92,   9,   0
+      27,  92,   9,   0,  27,  92,   9,   0,  27,  92,   9,   0,  27,  92,   9,   0
 };
 PRIM_ALIGN_128 static const BYTE rgbx_u_factors[] = {
-	 -15, -49,  64,   0, -15, -49,  64,   0, -15, -49,  64,   0, -15, -49,  64,   0
+     -15, -49,  64,   0, -15, -49,  64,   0, -15, -49,  64,   0, -15, -49,  64,   0
 };
 PRIM_ALIGN_128 static const BYTE rgbx_v_factors[] = {
-	  64, -58,  -6,   0,  64, -58,  -6,   0,  64, -58,  -6,   0,  64, -58,  -6,   0
+      64, -58,  -6,   0,  64, -58,  -6,   0,  64, -58,  -6,   0,  64, -58,  -6,   0
 };
 */
 
@@ -454,7 +454,7 @@ static INLINE void ssse3_RGBToYUV420_BGRX_UV(
 
 static pstatus_t ssse3_RGBToYUV420_BGRX(
     const BYTE* pSrc, UINT32 srcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3],
+    BYTE* pDst[3], const UINT32 dstStep[3],
     const prim_size_t* roi)
 {
 	UINT32 y;
@@ -498,7 +498,7 @@ static pstatus_t ssse3_RGBToYUV420_BGRX(
 
 static pstatus_t ssse3_RGBToYUV420(
     const BYTE* pSrc, UINT32 srcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3],
+    BYTE* pDst[3], const UINT32 dstStep[3],
     const prim_size_t* roi)
 {
 	switch (srcFormat)

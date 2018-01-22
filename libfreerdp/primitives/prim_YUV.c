@@ -629,7 +629,7 @@ static INLINE BYTE RGB2V(INT32 R, INT32 G, INT32 B)
 
 static pstatus_t general_RGBToYUV444_8u_P3AC4R(
     const BYTE* pSrc, UINT32 SrcFormat, const UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3], const prim_size_t* roi)
+    BYTE* pDst[3], const UINT32 dstStep[3], const prim_size_t* roi)
 {
 	const UINT32 bpp = GetBytesPerPixel(SrcFormat);
 	UINT32 x, y;
@@ -661,7 +661,7 @@ static pstatus_t general_RGBToYUV444_8u_P3AC4R(
 
 static INLINE pstatus_t general_RGBToYUV420_BGRX(
     const BYTE* pSrc, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3], const prim_size_t* roi)
+    BYTE* pDst[3], const UINT32 dstStep[3], const prim_size_t* roi)
 {
 	UINT32 x, y, i;
 	size_t x1 = 0, x2 = 4, x3 = srcStep, x4 = srcStep + 4;
@@ -728,7 +728,7 @@ static INLINE pstatus_t general_RGBToYUV420_BGRX(
 
 static INLINE pstatus_t general_RGBToYUV420_RGBX(
     const BYTE* pSrc, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3], const prim_size_t* roi)
+    BYTE* pDst[3], const UINT32 dstStep[3], const prim_size_t* roi)
 {
 	UINT32 x, y, i;
 	size_t x1 = 0, x2 = 4, x3 = srcStep, x4 = srcStep + 4;
@@ -795,7 +795,7 @@ static INLINE pstatus_t general_RGBToYUV420_RGBX(
 
 static INLINE pstatus_t general_RGBToYUV420_ANY(
     const BYTE* pSrc, UINT32 srcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3], const prim_size_t* roi)
+    BYTE* pDst[3], const UINT32 dstStep[3], const prim_size_t* roi)
 {
 	const UINT32 bpp = GetBytesPerPixel(srcFormat);
 	UINT32 x, y, i;
@@ -872,7 +872,7 @@ static INLINE pstatus_t general_RGBToYUV420_ANY(
 
 static pstatus_t general_RGBToYUV420_8u_P3AC4R(
     const BYTE* pSrc, UINT32 srcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3], const prim_size_t* roi)
+    BYTE* pDst[3], const UINT32 dstStep[3], const prim_size_t* roi)
 {
 	switch (srcFormat)
 	{
@@ -901,9 +901,6 @@ static INLINE pstatus_t general_RGBToAVC444YUV_BGRX(
 	 */
 	UINT32 x, y, n, numRows, numCols;
 	BOOL evenRow = TRUE;
-	BYTE* b1 = NULL;
-	BYTE* b2 = NULL;
-	BYTE* b3 = NULL;
 	BYTE* b4 = NULL;
 	BYTE* b5 = NULL;
 	BYTE* b6 = NULL;
@@ -912,16 +909,30 @@ static INLINE pstatus_t general_RGBToAVC444YUV_BGRX(
 	numRows = (roi->height + 1) & ~1;
 	numCols = (roi->width + 1) & ~1;
 
+	if (pDst1 && dst1Step)
+	{
+		pstatus_t status;
+		primitives_t* prim = primitives_get();
+
+		if (!prim)
+			return -1;
+
+		status = prim->RGBToYUV420_8u_P3AC4R(pSrc, srcFormat, srcStep, pDst1, dst1Step, roi);
+
+		if (status != PRIMITIVES_SUCCESS)
+			return status;
+	}
+
+	if (!pDst2 || !dst2Step)
+		return PRIMITIVES_SUCCESS;
+
 	for (y = 0; y < numRows; y++, evenRow = !evenRow)
 	{
 		const BYTE* src = y < roi->height ? pSrc + y * srcStep : pMaxSrc;
 		UINT32 i = y >> 1;
-		b1  = pDst1[0] + y * dst1Step[0];
 
 		if (evenRow)
 		{
-			b2 = pDst1[1] + i * dst1Step[1];
-			b3 = pDst1[2] + i * dst1Step[2];
 			b6 = pDst2[1] + i * dst2Step[1];
 			b7 = pDst2[2] + i * dst2Step[2];
 		}
@@ -952,13 +963,8 @@ static INLINE pstatus_t general_RGBToAVC444YUV_BGRX(
 				V2 = RGB2V(R, G, B);
 			}
 
-			*b1++ = Y1;
-			*b1++ = Y2;
-
 			if (evenRow)
 			{
-				*b2++ = U1;
-				*b3++ = V1;
 				*b6++ = U2;
 				*b7++ = V2;
 			}
@@ -989,9 +995,6 @@ static INLINE pstatus_t general_RGBToAVC444YUV_RGBX(
 	 */
 	UINT32 x, y, n, numRows, numCols;
 	BOOL evenRow = TRUE;
-	BYTE* b1 = NULL;
-	BYTE* b2 = NULL;
-	BYTE* b3 = NULL;
 	BYTE* b4 = NULL;
 	BYTE* b5 = NULL;
 	BYTE* b6 = NULL;
@@ -1000,16 +1003,30 @@ static INLINE pstatus_t general_RGBToAVC444YUV_RGBX(
 	numRows = (roi->height + 1) & ~1;
 	numCols = (roi->width + 1) & ~1;
 
+	if (pDst1 && dst1Step)
+	{
+		pstatus_t status;
+		primitives_t* prim = primitives_get();
+
+		if (!prim)
+			return -1;
+
+		status = prim->RGBToYUV420_8u_P3AC4R(pSrc, srcFormat, srcStep, pDst1, dst1Step, roi);
+
+		if (status != PRIMITIVES_SUCCESS)
+			return status;
+	}
+
+	if (!pDst2 || !dst2Step)
+		return PRIMITIVES_SUCCESS;
+
 	for (y = 0; y < numRows; y++, evenRow = !evenRow)
 	{
 		const BYTE* src = y < roi->height ? pSrc + y * srcStep : pMaxSrc;
 		UINT32 i = y >> 1;
-		b1  = pDst1[0] + y * dst1Step[0];
 
 		if (evenRow)
 		{
-			b2 = pDst1[1] + i * dst1Step[1];
-			b3 = pDst1[2] + i * dst1Step[2];
 			b6 = pDst2[1] + i * dst2Step[1];
 			b7 = pDst2[2] + i * dst2Step[2];
 		}
@@ -1040,13 +1057,8 @@ static INLINE pstatus_t general_RGBToAVC444YUV_RGBX(
 				V2 = RGB2V(R, G, B);
 			}
 
-			*b1++ = Y1;
-			*b1++ = Y2;
-
 			if (evenRow)
 			{
-				*b2++ = U1;
-				*b3++ = V1;
 				*b6++ = U2;
 				*b7++ = V2;
 			}
@@ -1130,9 +1142,6 @@ static INLINE pstatus_t general_RGBToAVC444YUV_ANY(
 	const UINT32 bpp = GetBytesPerPixel(srcFormat);
 	UINT32 x, y, n, numRows, numCols;
 	BOOL evenRow = TRUE;
-	BYTE* b1 = NULL;
-	BYTE* b2 = NULL;
-	BYTE* b3 = NULL;
 	BYTE* b4 = NULL;
 	BYTE* b5 = NULL;
 	BYTE* b6 = NULL;
@@ -1141,16 +1150,30 @@ static INLINE pstatus_t general_RGBToAVC444YUV_ANY(
 	numRows = (roi->height + 1) & ~1;
 	numCols = (roi->width + 1) & ~1;
 
+	if (pDst1 && dst1Step)
+	{
+		pstatus_t status;
+		primitives_t* prim = primitives_get();
+
+		if (!prim)
+			return -1;
+
+		status = prim->RGBToYUV420_8u_P3AC4R(pSrc, srcFormat, srcStep, pDst1, dst1Step, roi);
+
+		if (status != PRIMITIVES_SUCCESS)
+			return status;
+	}
+
+	if (!pDst2 || !dst2Step)
+		return PRIMITIVES_SUCCESS;
+
 	for (y = 0; y < numRows; y++, evenRow = !evenRow)
 	{
 		const BYTE* src = y < roi->height ? pSrc + y * srcStep : pMaxSrc;
 		UINT32 i = y >> 1;
-		b1  = pDst1[0] + y * dst1Step[0];
 
 		if (evenRow)
 		{
-			b2 = pDst1[1] + i * dst1Step[1];
-			b3 = pDst1[2] + i * dst1Step[2];
 			b6 = pDst2[1] + i * dst2Step[1];
 			b7 = pDst2[2] + i * dst2Step[2];
 		}
@@ -1180,13 +1203,8 @@ static INLINE pstatus_t general_RGBToAVC444YUV_ANY(
 				V2 = RGB2V(R, G, B);
 			}
 
-			*b1++ = Y1;
-			*b1++ = Y2;
-
 			if (evenRow)
 			{
-				*b2++ = U1;
-				*b3++ = V1;
 				*b6++ = U2;
 				*b7++ = V2;
 			}
@@ -1285,10 +1303,26 @@ static INLINE pstatus_t general_RGBToAVC444YUVv2_ANY(
 	 */
 	UINT32 x, y;
 
+	if (pDst1 && dst1Step)
+	{
+		pstatus_t status;
+		primitives_t* prim = primitives_get();
+
+		if (!prim)
+			return -1;
+
+		status = prim->RGBToYUV420_8u_P3AC4R(pSrc, srcFormat, srcStep, pDst1, dst1Step, roi);
+
+		if (status != PRIMITIVES_SUCCESS)
+			return status;
+	}
+
+	if (!pDst2)
+		return PRIMITIVES_SUCCESS;
+
 	for (y = 0; y < roi->height; y++)
 	{
 		const BYTE* src = pSrc + y * srcStep;
-		BYTE* b1  = pDst1 ? (pDst1[0] + y * dst1Step[0]) : NULL;
 		BYTE* b4  = pDst2 ? (pDst2[0] + y * dst2Step[0]) : NULL;
 		BYTE* b5  = pDst2 ? (pDst2[0] + y * dst2Step[0] + dst2Step[0] / 2) : NULL;
 
@@ -1298,12 +1332,6 @@ static INLINE pstatus_t general_RGBToAVC444YUVv2_ANY(
 			BYTE r, g, b;
 			SplitColor(color, srcFormat, &r, &g, &b, NULL, NULL);
 			src += 4;
-
-			if (b1)
-			{
-				const BYTE y = RGB2Y(r, g, b);
-				*b1++ = y;
-			}
 
 			if (b4 && b5 && ((x & 1) == 1))
 			{
@@ -1315,59 +1343,32 @@ static INLINE pstatus_t general_RGBToAVC444YUVv2_ANY(
 		}
 	}
 
-	if (pDst1)
+	for (y = 0; y < roi->height / 2; y++)
 	{
-		for (y = 0; y < roi->height / 2; y++)
-		{
-			const BYTE* src = pSrc + (2 * y) * srcStep;
-			BYTE* b2  = pDst1[1] + y * dst1Step[1];
-			BYTE* b3  = pDst1[2] + y * dst1Step[2];
+		const BYTE* src = pSrc + (2 * y + 1) * srcStep;
+		BYTE* b6  = pDst2[1] + y * dst2Step[1];
+		BYTE* b7  = pDst2[1] + y * dst2Step[1] + dst2Step[1] / 2;
+		BYTE* b8  = pDst2[2] + y * dst2Step[2];
+		BYTE* b9  = pDst2[2] + y * dst2Step[2] + dst2Step[2] / 2;
 
-			for (x = 0; x < roi->width / 2; x++)
+		for (x = 0; x < roi->width / 2; x++)
+		{
+			const UINT32 color = ReadColor(src, srcFormat);
+			BYTE r, g, b, u, v;
+			SplitColor(color, srcFormat, &r, &g, &b, NULL, NULL);
+			src += 8;
+			u = RGB2U(r, g, b);
+			v = RGB2V(r, g, b);
+
+			if (x & 1)
 			{
-				const UINT32 color = ReadColor(src, srcFormat);
-				BYTE r, g, b;
-				SplitColor(color, srcFormat, &r, &g, &b, NULL, NULL);
-				src += 8;
-				{
-					const BYTE u = RGB2U(r, g, b);
-					const BYTE v = RGB2V(r, g, b);
-					*b2++ = u;
-					*b3++ = v;
-				}
+				*b8++ = u;
+				*b9++ = v;
 			}
-		}
-	}
-
-	if (pDst2)
-	{
-		for (y = 0; y < roi->height / 2; y++)
-		{
-			const BYTE* src = pSrc + (2 * y + 1) * srcStep;
-			BYTE* b6  = pDst2[1] + y * dst2Step[1];
-			BYTE* b7  = pDst2[1] + y * dst2Step[1] + dst2Step[1] / 2;
-			BYTE* b8  = pDst2[2] + y * dst2Step[2];
-			BYTE* b9  = pDst2[2] + y * dst2Step[2] + dst2Step[2] / 2;
-
-			for (x = 0; x < roi->width / 2; x++)
+			else
 			{
-				const UINT32 color = ReadColor(src, srcFormat);
-				BYTE r, g, b, u, v;
-				SplitColor(color, srcFormat, &r, &g, &b, NULL, NULL);
-				src += 8;
-				u = RGB2U(r, g, b);
-				v = RGB2V(r, g, b);
-
-				if (x & 1)
-				{
-					*b8++ = u;
-					*b9++ = v;
-				}
-				else
-				{
-					*b6++ = u;
-					*b7++ = v;
-				}
+				*b6++ = u;
+				*b7++ = v;
 			}
 		}
 	}

@@ -181,11 +181,11 @@ typedef pstatus_t (*__YUV444ToRGB_8u_P3AC4R_t)(
     const prim_size_t* roi);
 typedef pstatus_t (*__RGBToYUV420_8u_P3AC4R_t)(
     const BYTE* pSrc, UINT32 SrcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3],
+    BYTE* pDst[3], const UINT32 dstStep[3],
     const prim_size_t* roi);
 typedef pstatus_t (*__RGBToYUV444_8u_P3AC4R_t)(
     const BYTE* pSrc, UINT32 SrcFormat, UINT32 srcStep,
-    BYTE* pDst[3], UINT32 dstStep[3],
+    BYTE* pDst[3], const UINT32 dstStep[3],
     const prim_size_t* roi);
 typedef pstatus_t (*__YUV420CombineToYUV444_t)(
     avc444_frame_type type,
