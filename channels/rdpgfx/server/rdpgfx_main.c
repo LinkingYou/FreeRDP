@@ -459,6 +459,7 @@ static INLINE UINT32 rdpgfx_estimate_surface_command(RDPGFX_SURFACE_COMMAND*
 			return RDPGFX_WIRE_TO_SURFACE_PDU_1_SIZE + h264Size;
 
 		case RDPGFX_CODECID_AVC444:
+		case RDPGFX_CODECID_AVC444v2:
 			havc444 = (RDPGFX_AVC444_BITMAP_STREAM*)cmd->extra;
 			h264Size = sizeof(UINT32); /* cbAvc420EncodedBitstream1 */
 			/* avc420EncodedBitstream1 */
@@ -623,7 +624,7 @@ static UINT rdpgfx_write_surface_command(wStream* s,
 				return error;
 			}
 		}
-		else if (cmd->codecId == RDPGFX_CODECID_AVC444)
+		else if ((cmd->codecId == RDPGFX_CODECID_AVC444) || (cmd->codecId == RDPGFX_CODECID_AVC444v2))
 		{
 			havc444 = (RDPGFX_AVC444_BITMAP_STREAM*)cmd->extra;
 			havc420 = &(havc444->bitstream[0]);			/* avc420EncodedBitstreamInfo (4 bytes) */
@@ -655,7 +656,12 @@ static UINT rdpgfx_write_surface_command(wStream* s,
 			Stream_Write(s, cmd->data, cmd->length);
 		}
 
-		assert(Stream_GetPosition(s) <= Stream_Capacity(s));
+		{
+			size_t cap = Stream_Capacity(s);
+			size_t pos = Stream_GetPosition(s);
+			assert(Stream_GetPosition(s) <= Stream_Capacity(s));
+		}
+
 		/* Fill actual bitmap data length */
 		bitmapDataLength = Stream_GetPosition(s) - bitmapDataStart;
 		Stream_SetPosition(s, bitmapDataStart - sizeof(UINT32));
@@ -1272,28 +1278,28 @@ static UINT rdpgfx_server_receive_pdu(RdpgfxServerContext* context, wStream* s)
 		case RDPGFX_CMDID_FRAMEACKNOWLEDGE:
 			if ((error = rdpgfx_recv_frame_acknowledge_pdu(context, s)))
 				WLog_ERR(TAG, "rdpgfx_recv_frame_acknowledge_pdu "
-						"failed with error %"PRIu32"!", error);
+				         "failed with error %"PRIu32"!", error);
 
 			break;
 
 		case RDPGFX_CMDID_CACHEIMPORTOFFER:
 			if ((error = rdpgfx_recv_cache_import_offer_pdu(context, s)))
 				WLog_ERR(TAG, "rdpgfx_recv_cache_import_offer_pdu "
-						"failed with error %"PRIu32"!", error);
+				         "failed with error %"PRIu32"!", error);
 
 			break;
 
 		case RDPGFX_CMDID_CAPSADVERTISE:
 			if ((error = rdpgfx_recv_caps_advertise_pdu(context, s)))
 				WLog_ERR(TAG, "rdpgfx_recv_caps_advertise_pdu "
-						"failed with error %"PRIu32"!", error);
+				         "failed with error %"PRIu32"!", error);
 
 			break;
 
 		case RDPGFX_CMDID_QOEFRAMEACKNOWLEDGE:
 			if ((error = rdpgfx_recv_qoe_frame_acknowledge_pdu(context, s)))
 				WLog_ERR(TAG, "rdpgfx_recv_qoe_frame_acknowledge_pdu "
-						"failed with error %"PRIu32"!", error);
+				         "failed with error %"PRIu32"!", error);
 
 			break;
 
@@ -1332,7 +1338,6 @@ static void* rdpgfx_server_thread_func(void* arg)
 	UINT error = CHANNEL_RC_OK;
 	buffer = NULL;
 	nCount = 0;
-
 	events[nCount++] = priv->stopEvent;
 	events[nCount++] = priv->channelEvent;
 
@@ -1653,7 +1658,7 @@ UINT rdpgfx_server_handle_messages(RdpgfxServerContext* context)
 			if ((ret = rdpgfx_server_receive_pdu(context, s)))
 			{
 				WLog_ERR(TAG, "rdpgfx_server_receive_pdu "
-						"failed with error %"PRIu32"!", ret);
+				         "failed with error %"PRIu32"!", ret);
 				return ret;
 			}
 		}

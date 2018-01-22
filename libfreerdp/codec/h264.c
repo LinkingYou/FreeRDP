@@ -240,7 +240,7 @@ INT32 avc444_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
 
 		status = h264->subsystem->Compress(h264, ppDstData, pDstSize);
 
-		if (status != 0)
+		if (status < 0)
 			return status;
 	}
 
@@ -253,18 +253,18 @@ INT32 avc444_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
 
 		status = h264->subsystem->Compress(h264, ppAuxDstData, pAuxDstSize);
 
-		if (status != 0)
+		if (status < 0)
 			return status;
 	}
 
 	if (ppAuxDstData && ppDstData)
 		*op = 0;
-
-	if (ppDstData)
+	else if (ppDstData)
 		*op = 1;
-
-	if (ppAuxDstData)
+	else if (ppAuxDstData)
 		*op = 2;
+	else
+		return -2;
 
 	return status;
 }
