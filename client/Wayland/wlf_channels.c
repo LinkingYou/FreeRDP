@@ -39,7 +39,7 @@ static UINT wlf_encomsp_participant_created(EncomspClientContext* context,
 
 static void wlf_encomsp_init(wlfContext* wlf, EncomspClientContext* encomsp)
 {
-	if (!wlf)
+	if (!wlf || !encomsp)
 		return;
 
 	wlf->encomsp = encomsp;
@@ -49,10 +49,14 @@ static void wlf_encomsp_init(wlfContext* wlf, EncomspClientContext* encomsp)
 
 static void wlf_encomsp_uninit(wlfContext* wlf, EncomspClientContext* encomsp)
 {
-	if (!wlf)
-		return;
+	if (encomsp)
+	{
+		encomsp->custom = NULL;
+		encomsp->ParticipantCreated = NULL;
+	}
 
-	wlf->encomsp = NULL;
+	if (wlf)
+		wlf->encomsp = NULL;
 }
 
 
@@ -60,7 +64,12 @@ void wlf_OnChannelConnectedEventHandler(rdpContext* context,
                                         ChannelConnectedEventArgs* e)
 {
 	wlfContext* wlf = (wlfContext*) context;
-	rdpSettings* settings = context->settings;
+	rdpSettings* settings;
+
+	if (!context || !e || !context->settings)
+		return;
+
+	settings = context->settings;
 
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
@@ -90,7 +99,12 @@ void wlf_OnChannelDisconnectedEventHandler(rdpContext* context,
         ChannelDisconnectedEventArgs* e)
 {
 	wlfContext* wlf = (wlfContext*) context;
-	rdpSettings* settings = context->settings;
+	rdpSettings* settings;
+
+	if (!context || !e || !context->settings)
+		return;
+
+	settings = context->settings;
 
 	if (strcmp(e->name, RDPEI_DVC_CHANNEL_NAME) == 0)
 	{
