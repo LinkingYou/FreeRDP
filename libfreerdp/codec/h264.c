@@ -43,14 +43,13 @@ BOOL avc420_ensure_buffer(H264_CONTEXT* h264, UINT32 stride, UINT32 width, UINT3
 		stride = width;
 
 	if (!h264->pYUVData[0] || !h264->pYUVData[1] || !h264->pYUVData[2] ||
-		(width != h264->width) || (height != h264->height) || (stride != h264->iStride[0]))
+	    (width != h264->width) || (height != h264->height) || (stride != h264->iStride[0]))
 	{
 		h264->iStride[0] = stride;
 		h264->iStride[1] = (stride + 1) / 2;
 		h264->iStride[2] = (stride + 1) / 2;
 		h264->width = width;
 		h264->height = height;
-
 		_aligned_free(h264->pYUVData[0]);
 		_aligned_free(h264->pYUVData[1]);
 		_aligned_free(h264->pYUVData[2]);
@@ -203,8 +202,9 @@ INT32 avc420_compress(H264_CONTEXT* h264, const BYTE* pSrcData, DWORD SrcFormat,
 
 	roi.width = nSrcWidth;
 	roi.height = nSrcHeight;
+
 	if (prims->RGBToYUV420_8u_P3AC4R(pSrcData, SrcFormat, nSrcStep, h264->pYUVData, h264->iStride,
-								 &roi) != PRIMITIVES_SUCCESS)
+	                                 &roi) != PRIMITIVES_SUCCESS)
 		return -1;
 
 	return h264->subsystem->Compress(h264, ppDstData, pDstSize);
@@ -249,7 +249,7 @@ static BOOL avc444_ensure_buffer(H264_CONTEXT* h264,
 	{
 		if (!ppYUVDstData[x] || (piDstSize[x] == 0) || (piDstStride[x] == 0))
 		{
-			WLog_ERR(TAG, "YUV buffer not initialized! check your decoder settings");
+			WLog_Print(h264->log, WLOG_ERROR, "YUV buffer not initialized! check your decoder settings");
 			goto fail;
 		}
 	}
@@ -400,32 +400,31 @@ INT32 avc444_decompress(H264_CONTEXT* h264, BYTE op,
 			break;
 	}
 
-	WLog_INFO(TAG,
-	          "luma=%"PRIu64" [avg=%lf] chroma=%"PRIu64" [avg=%lf] combined=%"PRIu64" [avg=%lf]",
-	          op1, op1sum, op2, op2sum, op3, op3sum);
+	WLog_Print(h264->log, WLOG_INFO,
+	           "luma=%"PRIu64" [avg=%lf] chroma=%"PRIu64" [avg=%lf] combined=%"PRIu64" [avg=%lf]",
+	           op1, op1sum, op2, op2sum, op3, op3sum);
 #endif
 	return status;
 }
 
 #define MAX_SUBSYSTEMS 10
 static INIT_ONCE subsystems_once = INIT_ONCE_STATIC_INIT;
-static H264_CONTEXT_SUBSYSTEM *subSystems[MAX_SUBSYSTEMS];
+static H264_CONTEXT_SUBSYSTEM* subSystems[MAX_SUBSYSTEMS];
 
 #if defined(_WIN32) && defined(WITH_MEDIA_FOUNDATION)
 extern H264_CONTEXT_SUBSYSTEM g_Subsystem_MF;
 #endif
 
-static BOOL CALLBACK h264_register_subsystems(PINIT_ONCE once, PVOID param, PVOID *context) {
+static BOOL CALLBACK h264_register_subsystems(PINIT_ONCE once, PVOID param, PVOID* context)
+{
 	int i = 0;
 	ZeroMemory(subSystems, sizeof(subSystems));
-
 #if defined(_WIN32) && defined(WITH_MEDIA_FOUNDATION)
 	{
 		subSystems[i] = &g_Subsystem_MF;
 		i++;
 	}
 #endif
-
 #ifdef WITH_OPENH264
 	{
 		extern H264_CONTEXT_SUBSYSTEM g_Subsystem_OpenH264;
@@ -433,7 +432,6 @@ static BOOL CALLBACK h264_register_subsystems(PINIT_ONCE once, PVOID param, PVOI
 		i++;
 	}
 #endif
-
 #ifdef WITH_FFMPEG
 	{
 		extern H264_CONTEXT_SUBSYSTEM g_Subsystem_libavcodec;
@@ -441,7 +439,6 @@ static BOOL CALLBACK h264_register_subsystems(PINIT_ONCE once, PVOID param, PVOI
 		i++;
 	}
 #endif
-
 #ifdef WITH_X264
 	{
 		extern H264_CONTEXT_SUBSYSTEM g_Subsystem_x264;
@@ -449,7 +446,6 @@ static BOOL CALLBACK h264_register_subsystems(PINIT_ONCE once, PVOID param, PVOI
 		i++;
 	}
 #endif
-
 	return i > 0;
 }
 
@@ -461,13 +457,18 @@ BOOL h264_context_init(H264_CONTEXT* h264)
 	if (!h264)
 		return FALSE;
 
-	h264->subsystem = NULL;
+	h264->log = WLog_Get(TAG);
 
+	if (!h264->log)
+		return FALSE;
+
+	h264->subsystem = NULL;
 	InitOnceExecuteOnce(&subsystems_once, h264_register_subsystems, NULL, NULL);
 
 	for (i = 0; i < MAX_SUBSYSTEMS; i++)
 	{
 		H264_CONTEXT_SUBSYSTEM* subsystem = subSystems[i];
+
 		if (!subsystem || !subsystem->Init)
 			break;
 
