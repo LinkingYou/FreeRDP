@@ -326,11 +326,6 @@ PRIM_ALIGN_128 static const BYTE bgrx_v_factors[] =
 	-6, -58,  64,   0,  -6, -58,  64,   0,  -6, -58,  64,   0,  -6, -58,  64,   0
 };
 
-PRIM_ALIGN_128 static const BYTE const_buf_128b[] =
-{
-	128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
-};
-
 /*
 TODO:
 RGB[AX] can simply be supported using the following factors. And instead of loading the
@@ -392,12 +387,12 @@ static INLINE void ssse3_RGBToYUV420_BGRX_UV(
     BYTE* dst1, BYTE* dst2, UINT32 width)
 {
 	UINT32 x;
-	__m128i vector128, u_factors, v_factors, x0, x1, x2, x3, x4, x5;
+	const __m128i const128 = _mm_set1_epi16(128);
+	__m128i u_factors, v_factors, x0, x1, x2, x3, x4, x5;
 	const __m128i* rgb1 = (const __m128i*)src1;
 	const __m128i* rgb2 = (const __m128i*)src2;
 	__m64* udst = (__m64*)dst1;
 	__m64* vdst = (__m64*)dst2;
-	vector128 = _mm_load_si128((__m128i*)const_buf_128b);
 	u_factors = _mm_load_si128((__m128i*)bgrx_u_factors);
 	v_factors = _mm_load_si128((__m128i*)bgrx_v_factors);
 
@@ -439,10 +434,11 @@ static INLINE void ssse3_RGBToYUV420_BGRX_UV(
 		/* shift the results */
 		x0 = _mm_srai_epi16(x0, 7);
 		x1 = _mm_srai_epi16(x1, 7);
-		/* pack the 16 words into bytes */
-		x0 = _mm_packs_epi16(x0, x1);
 		/* add 128 */
-		x0 = _mm_add_epi8(x0, vector128);
+		x0 = _mm_adds_epi16(x0, const128);
+		x1 = _mm_adds_epi16(x1, const128);
+		/* pack the 16 words into bytes */
+		x0 = _mm_packus_epi16(x0, x1);
 		/* the lower 8 bytes go to the u plane */
 		_mm_storel_pi(udst++, _mm_castsi128_ps(x0));
 		/* the upper 8 bytes go to the v plane */
@@ -522,10 +518,6 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_DOUBLE_ROW(
 	UINT32 x;
 	const __m128i* argbEven = (const __m128i*) srcEven;
 	const __m128i* argbOdd = (const __m128i*) srcOdd;
-	const __m128i y_factors = _mm_load_si128((__m128i*)bgrx_y_factors);
-	const __m128i u_factors = _mm_load_si128((__m128i*)bgrx_u_factors);
-	const __m128i v_factors = _mm_load_si128((__m128i*)bgrx_v_factors);
-	const __m128i vector128 = _mm_load_si128((__m128i*)const_buf_128b);
 
 	for (x = 0; x < width; x += 16)
 	{
@@ -540,26 +532,29 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_DOUBLE_ROW(
 		const __m128i xo4 = _mm_load_si128(argbOdd++); // 4th 4 pixels
 		{
 			/* Y: multiplications with subtotals and horizontal sums */
+			const __m128i y_factors = _mm_load_si128((__m128i*)bgrx_y_factors);
 			const __m128i ye1 = _mm_srli_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe1, y_factors),
 			                                   _mm_maddubs_epi16(xe2, y_factors)), 7);
 			const __m128i ye2 = _mm_srli_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe3, y_factors),
 			                                   _mm_maddubs_epi16(xe4, y_factors)), 7);
 			const __m128i ye = _mm_packus_epi16(ye1, ye2);
+			/* store y [b1] */
+			_mm_storeu_si128((__m128i*)b1Even, ye);
+			b1Even += 16;
+		}
+
+		if (b1Odd)
+		{
+			const __m128i y_factors = _mm_load_si128((__m128i*)bgrx_y_factors);
 			const __m128i yo1 = _mm_srli_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo1, y_factors),
 			                                   _mm_maddubs_epi16(xo2, y_factors)), 7);
 			const __m128i yo2 = _mm_srli_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo3, y_factors),
 			                                   _mm_maddubs_epi16(xo4, y_factors)), 7);
 			const __m128i yo = _mm_packus_epi16(yo1, yo2);
-			/* store y [b1] */
-			_mm_storeu_si128((__m128i*)b1Even, ye);
-			b1Even += 16;
-
-			if (b1Odd)
-			{
-				_mm_storeu_si128((__m128i*)b1Odd, yo);
-				b1Odd += 16;
-			}
+			_mm_storeu_si128((__m128i*)b1Odd, yo);
+			b1Odd += 16;
 		}
+
 		{
 			/* We have now
 			   * 16 even U values in ue
@@ -569,20 +564,24 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_DOUBLE_ROW(
 			   * 3.3.8.3.2 YUV420p Stream Combination for YUV444 mode */
 			__m128i ue, uo;
 			{
-				const __m128i ue1 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe1, u_factors),
-				                                   _mm_maddubs_epi16(xe2, u_factors)), 7);
-				const __m128i ue2 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe3, u_factors),
-				                                   _mm_maddubs_epi16(xe4, u_factors)), 7);
-				ue = _mm_add_epi8(_mm_packs_epi16(ue1, ue2), vector128);
+				const __m128i const128 = _mm_set1_epi16(128);
+				const __m128i u_factors = _mm_load_si128((__m128i*)bgrx_u_factors);
+				const __m128i ue1 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe1, u_factors),
+				                                   _mm_maddubs_epi16(xe2, u_factors)), 7), const128);
+				const __m128i ue2 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe3, u_factors),
+				                                   _mm_maddubs_epi16(xe4, u_factors)), 7), const128);
+				ue = _mm_packus_epi16(ue1, ue2);
 			}
 
 			if (b1Odd)
 			{
-				const __m128i uo1 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo1, u_factors),
-				                                   _mm_maddubs_epi16(xo2, u_factors)), 7);
-				const __m128i uo2 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo3, u_factors),
-				                                   _mm_maddubs_epi16(xo4, u_factors)), 7);
-				uo = _mm_add_epi8(_mm_packs_epi16(uo1, uo2), vector128);
+				const __m128i const128 = _mm_set1_epi16(128);
+				const __m128i u_factors = _mm_load_si128((__m128i*)bgrx_u_factors);
+				const __m128i uo1 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo1, u_factors),
+				                                   _mm_maddubs_epi16(xo2, u_factors)), 7), const128);
+				const __m128i uo2 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo3, u_factors),
+				                                   _mm_maddubs_epi16(xo4, u_factors)), 7), const128);
+				uo = _mm_packus_epi16(uo1, uo2);
 			}
 
 			/* Now we need the following storage distribution:
@@ -627,6 +626,7 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_DOUBLE_ROW(
 				b6 += 8;
 			}
 		}
+
 		{
 			/* We have now
 			   * 16 even V values in ue
@@ -636,20 +636,24 @@ static INLINE void ssse3_RGBToAVC444YUV_BGRX_DOUBLE_ROW(
 			   * 3.3.8.3.2 YUV420p Stream Combination for YUV444 mode */
 			__m128i ve, vo;
 			{
-				const __m128i ve1 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe1, v_factors),
-				                                   _mm_maddubs_epi16(xe2, v_factors)), 7);
-				const __m128i ve2 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe3, v_factors),
-				                                   _mm_maddubs_epi16(xe4, v_factors)), 7);
-				ve = _mm_add_epi8(_mm_packs_epi16(ve1, ve2), vector128);
+				const __m128i const128 = _mm_set1_epi16(128);
+				const __m128i v_factors = _mm_load_si128((__m128i*)bgrx_v_factors);
+				const __m128i ve1 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe1, v_factors),
+				                                   _mm_maddubs_epi16(xe2, v_factors)), 7), const128);
+				const __m128i ve2 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xe3, v_factors),
+				                                   _mm_maddubs_epi16(xe4, v_factors)), 7), const128);
+				ve = _mm_packus_epi16(ve1, ve2);
 			}
 
 			if (b1Odd)
 			{
-				const __m128i vo1 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo1, v_factors),
-				                                   _mm_maddubs_epi16(xo2, v_factors)), 7);
-				const __m128i vo2 = _mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo3, v_factors),
-				                                   _mm_maddubs_epi16(xo4, v_factors)), 7);
-				vo = _mm_add_epi8(_mm_packs_epi16(vo1, vo2), vector128);
+				const __m128i const128 = _mm_set1_epi16(128);
+				const __m128i v_factors = _mm_load_si128((__m128i*)bgrx_v_factors);
+				const __m128i vo1 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo1, v_factors),
+				                                   _mm_maddubs_epi16(xo2, v_factors)), 7), const128);
+				const __m128i vo2 = _mm_adds_epi16(_mm_srai_epi16(_mm_hadd_epi16(_mm_maddubs_epi16(xo3, v_factors),
+				                                   _mm_maddubs_epi16(xo4, v_factors)), 7), const128);
+				vo = _mm_packus_epi16(vo1, vo2);
 			}
 
 			/* Now we need the following storage distribution:
