@@ -140,6 +140,6 @@ BOOL wlf_handle_expose(freerdp* instance, UwacExposeEvent* ev)
 		return FALSE;
 
 	gdi = instance->context->gdi;
-	return gdi_send_suppress_output(gdi, ev->suppress);
+	return gdi_send_suppress_output(gdi, ev->expose);
 }
 
