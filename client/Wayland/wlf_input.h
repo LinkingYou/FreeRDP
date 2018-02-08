@@ -35,4 +35,6 @@ BOOL wlf_handle_pointer_axis(freerdp* instance, UwacPointerAxisEvent* ev);
 BOOL wlf_handle_key(freerdp* instance, UwacKeyEvent* ev);
 BOOL wlf_keyboard_enter(freerdp* instance, UwacKeyboardEnterLeaveEvent* ev);
 
+BOOL wlf_handle_expose(freerdp* instance, UwacExposeEvent* ev);
+
 #endif /* FREERDP_CLIENT_WAYLAND_INPUT_H */

@@ -65,10 +65,8 @@ static BOOL wl_begin_paint(rdpContext* context)
 	if (!gdi->primary)
 		return FALSE;
 
-	gdi->primary->hdc->hwnd->invalid->null = TRUE;
 	return TRUE;
 }
-
 
 static BOOL wl_end_paint(rdpContext* context)
 {
@@ -83,6 +81,9 @@ static BOOL wl_end_paint(rdpContext* context)
 		return FALSE;
 
 	gdi = context->gdi;
+
+	if (gdi->suppressOutput)
+		return TRUE;
 
 	if (gdi->primary->hdc->hwnd->invalid->null)
 		return TRUE;
@@ -110,9 +111,13 @@ static BOOL wl_end_paint(rdpContext* context)
 		return FALSE;
 
 	context_w->haveDamage = TRUE;
-	return wl_update_content(context_w);
-}
+	if (!wl_update_content(context_w))
+		return FALSE;
 
+	gdi->primary->hdc->hwnd->invalid->null = TRUE;
+	gdi->primary->hdc->hwnd->ninvalid = 0;
+	return TRUE;
+}
 
 static BOOL wl_pre_connect(freerdp* instance)
 {
@@ -256,6 +261,12 @@ static BOOL handle_uwac_events(freerdp* instance, UwacDisplay* display)
 		/*printf("UWAC event type %d\n", event.type);*/
 		switch (event.type)
 		{
+			case UWAC_EVENT_EXPOSE:
+				if (!wlf_handle_expose(instance, &event.expose))
+					return FALSE;
+
+				break;
+
 			case UWAC_EVENT_FRAME_DONE:
 				if (!instance)
 					continue;
@@ -263,7 +274,7 @@ static BOOL handle_uwac_events(freerdp* instance, UwacDisplay* display)
 				context = (wlfContext*)instance->context;
 				context->waitingFrameDone = FALSE;
 
-				if (context->haveDamage && !wl_update_content(instance->context))
+				if (context->haveDamage && !wl_update_content(context))
 					return FALSE;
 
 				break;
@@ -483,8 +494,9 @@ int main(int argc, char* argv[])
 
 	status = freerdp_client_settings_parse_command_line(context->settings, argc,
 	         argv, FALSE);
-	status = freerdp_client_settings_command_line_status_print(context->settings,
-	         status, argc, argv);
+	if (status != 0)
+		status = freerdp_client_settings_command_line_status_print(context->settings,
+				 status, argc, argv);
 
 	if (status)
 		return 0;

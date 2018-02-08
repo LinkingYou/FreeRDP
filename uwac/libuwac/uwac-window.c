@@ -180,6 +180,50 @@ static const struct xdg_surface_listener xdg_surface_listener =
 	xdg_handle_close,
 };
 
+static void surface_expose_enter(void *data,
+		      struct wl_surface *wl_surface,
+		      struct wl_output *output)
+{
+	UwacExposeEvent* event;
+	UwacWindow* window = (UwacWindow*)data;
+	event = (UwacExposeEvent*)UwacDisplayNewEvent(window->display, UWAC_EVENT_EXPOSE);
+
+	if (!event)
+	{
+		assert(uwacErrorHandler(window->display, UWAC_ERROR_INTERNAL,
+		                        "failed to allocate a expose event\n"));
+		return;
+	}
+
+	event->window = window;
+	event->expose = true;
+}
+
+static void surface_expose_leave(void *data,
+		      struct wl_surface *wl_surface,
+		      struct wl_output *output)
+{
+	UwacExposeEvent* event;
+	UwacWindow* window = (UwacWindow*)data;
+	event = (UwacExposeEvent*)UwacDisplayNewEvent(window->display, UWAC_EVENT_EXPOSE);
+
+	if (!event)
+	{
+		assert(uwacErrorHandler(window->display, UWAC_ERROR_INTERNAL,
+		                        "failed to allocate a expose event\n"));
+		return;
+	}
+
+	event->window = window;
+	event->expose = false;
+}
+
+static const struct wl_surface_listener surface_expose_listener =
+{
+	surface_expose_enter,
+	surface_expose_leave
+};
+
 #if BUILD_IVI
 
 static void ivi_handle_configure(void* data, struct ivi_surface* surface,
@@ -426,6 +470,7 @@ UwacWindow* UwacCreateWindowShm(UwacDisplay* display, uint32_t width, uint32_t h
 	}
 
 	wl_surface_set_user_data(w->surface, w);
+	wl_surface_add_listener(w->surface, &surface_listener, w);
 
 	if (display->xdg_shell)
 	{

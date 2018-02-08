@@ -89,6 +89,7 @@ enum {
 	UWAC_EVENT_TOUCH_FRAME_END,
 	UWAC_EVENT_FRAME_DONE,
 	UWAC_EVENT_CLOSE,
+	UWAC_EVENT_EXPOSE,
 };
 
 /** @brief window states */
@@ -207,6 +208,12 @@ struct uwac_close_event {
 };
 typedef struct uwac_close_event UwacCloseEvent;
 
+struct uwac_expose_event {
+	int type;
+	UwacWindow *window;
+	bool expose;
+};
+typedef struct uwac_expose_event UwacExposeEvent;
 
 /** @brief */
 union uwac_event {
@@ -228,6 +235,7 @@ union uwac_event {
 	UwacFrameDoneEvent frame_done;
 	UwacConfigureEvent configure;
 	UwacCloseEvent close;
+	UwacExposeEvent expose;
 };
 typedef union uwac_event UwacEvent;
 

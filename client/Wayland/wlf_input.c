@@ -131,3 +131,15 @@ BOOL wlf_keyboard_enter(freerdp* instance, UwacKeyboardEnterLeaveEvent* ev)
 	return input->FocusInEvent(input, 0) &&
 	       input->MouseEvent(input, PTR_FLAGS_MOVE, 0, 0);
 }
+
+BOOL wlf_handle_expose(freerdp* instance, UwacExposeEvent* ev)
+{
+	rdpGdi* gdi;
+
+	if (!instance || !ev || !instance->context || !instance->context->gdi)
+		return FALSE;
+
+	gdi = instance->context->gdi;
+	return gdi_send_suppress_output(gdi, ev.suppress);
+}
+
