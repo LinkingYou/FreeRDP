@@ -470,7 +470,7 @@ UwacWindow* UwacCreateWindowShm(UwacDisplay* display, uint32_t width, uint32_t h
 	}
 
 	wl_surface_set_user_data(w->surface, w);
-	wl_surface_add_listener(w->surface, &surface_listener, w);
+	wl_surface_add_listener(w->surface, &surface_expose_listener, w);
 
 	if (display->xdg_shell)
 	{
