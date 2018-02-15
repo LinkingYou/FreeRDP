@@ -42,10 +42,10 @@
 
 #endif
 
-DWORD VIRTUAL_SCANCODE_TO_X11_KEYCODE[256][2];
-DWORD X11_KEYCODE_TO_VIRTUAL_SCANCODE[256];
+static DWORD VIRTUAL_SCANCODE_TO_X11_KEYCODE[256][2];
+static DWORD X11_KEYCODE_TO_VIRTUAL_SCANCODE[256];
 
-int freerdp_detect_keyboard(DWORD* keyboardLayoutId)
+static int freerdp_detect_keyboard(DWORD* keyboardLayoutId)
 {
 #ifdef WITH_X11
 	if (*keyboardLayoutId == 0)
@@ -61,7 +61,7 @@ int freerdp_detect_keyboard(DWORD* keyboardLayoutId)
 	return 0;
 }
 
-int freerdp_keyboard_init_apple(DWORD* keyboardLayoutId, DWORD x11_keycode_to_rdp_scancode[256])
+static int freerdp_keyboard_init_apple(DWORD* keyboardLayoutId, DWORD x11_keycode_to_rdp_scancode[256])
 {
 	DWORD vkcode;
 	DWORD keycode;
@@ -78,7 +78,7 @@ int freerdp_keyboard_init_apple(DWORD* keyboardLayoutId, DWORD x11_keycode_to_rd
 	return 0;
 }
 
-int freerdp_keyboard_init_x11_evdev(DWORD* keyboardLayoutId, DWORD x11_keycode_to_rdp_scancode[256])
+static int freerdp_keyboard_init_x11_evdev(DWORD* keyboardLayoutId, DWORD x11_keycode_to_rdp_scancode[256])
 {
 	DWORD vkcode;
 	DWORD keycode;
@@ -116,7 +116,6 @@ DWORD freerdp_keyboard_init(DWORD keyboardLayoutId)
 
 	if (status < 0)
 		status = freerdp_keyboard_init_x11_evdev(&keyboardLayoutId, X11_KEYCODE_TO_VIRTUAL_SCANCODE);
-
 #endif
 
 	freerdp_detect_keyboard(&keyboardLayoutId);
