@@ -196,12 +196,11 @@ void xf_SetWindowFullscreen(xfContext* xfc, xfWindow* window, BOOL fullscreen)
 
 	if (xfc->_NET_WM_FULLSCREEN_MONITORS != None)
 	{
-		xf_ResizeDesktopWindow(xfc, window, width, height);
-
+		//xf_ResizeDesktopWindow(xfc, window, width, height);
 		if (fullscreen)
 		{
 			/* enter full screen: move the window before adding NET_WM_STATE_FULLSCREEN */
-			XMoveWindow(xfc->display, window->handle, startX, startY);
+			//XMoveWindow(xfc->display, window->handle, startX, startY);
 		}
 
 		/* Set the fullscreen state */
